@@ -1,201 +1,526 @@
-<!DOCTYPE html>
+html_content = """<!DOCTYPE html>
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Puzzel Indienen</title>
-    <!-- Supabase JS Client met cache-buster -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2?v=999"></script>
+    <title>Ontwerpers Dashboard - Dungeon Game</title>
     <style>
-        body { font-family: sans-serif; max-width: 500px; margin: 20px auto; padding: 20px; background-color: #fdfbf7; }
-        label, textarea, input { display: block; width: 100%; margin-bottom: 5px; }
-        textarea, input { margin-bottom: 15px; padding: 8px; box-sizing: border-box; }
-        .char-count { font-size: 0.8em; color: #666; margin-top: -10px; margin-bottom: 15px; text-align: right; }
-        button { background-color: #4a6fa5; color: white; padding: 10px; border: none; cursor: pointer; width: 100%; }
+        :root {
+            --bg-dark: #1a1a2e;
+            --bg-panel: #16213e;
+            --primary: #0f3460;
+            --accent: #e94560;
+            --text-light: #e0e0e0;
+            --success: #4caf50;
+            --warning: #ff9800;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Custom Scrollbar voor een strakkere look */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        /* Sidebar Menu */
+        .sidebar {
+            width: 250px;
+            background-color: var(--bg-panel);
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            border-right: 2px solid var(--primary);
+            flex-shrink: 0;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            color: var(--accent);
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            padding: 15px 20px;
+            text-align: left;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.2s, border-left 0.2s;
+            border-left: 4px solid transparent;
+        }
+
+        .tab-button:hover {
+            background-color: var(--primary);
+        }
+
+        .tab-button.active {
+            background-color: var(--primary);
+            border-left: 4px solid var(--accent);
+            font-weight: bold;
+        }
+
+        /* Content Area */
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .tab-panel {
+            display: none;
+            background-color: var(--bg-panel);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            /* AANGEPAST: Max-width is nu veel breder (was 800px) */
+            max-width: 1200px; 
+            margin: 0 auto;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        h3 {
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+
+        /* Nieuwe Layout voor Profiel Tab (2 kolommen) */
+        .profile-layout {
+            display: flex;
+            gap: 40px;
+            align-items: stretch;
+            flex-wrap: wrap;
+        }
+
+        .profile-left {
+            flex: 1;
+            min-width: 300px;
+            max-width: 450px;
+        }
+
+        .profile-right {
+            flex: 1.5;
+            min-width: 300px;
+            border: 2px dashed var(--primary);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            background-color: rgba(15, 52, 96, 0.1);
+            color: var(--success);
+            text-align: center;
+        }
+
+        /* Forms & Inputs */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="number"], input[type="email"], input[type="password"], select, textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid var(--primary);
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .flex-row > div {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        button.btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        button.btn:hover {
+            opacity: 0.8;
+        }
+
+        /* Wachtwoord Wijzigen Sectie */
+        .password-section {
+            margin-top: 25px;
+            padding: 20px;
+            background: var(--bg-dark);
+            border-radius: 6px;
+            border-left: 4px solid var(--warning);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background-color: var(--bg-dark);
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 4px solid var(--accent);
+            text-align: center;
+        }
+
+        .stat-card h4 {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <h2>Dien een nieuwe puzzel in</h2>
-    <form id="puzzleForm">
-        <label>Puzzelvraag (max 200 tekens):</label>
-        <textarea id="question" maxlength="200" rows="4" required></textarea>
-        <div id="qCount" class="char-count">0 / 200</div>
-        
-        <label>Oplossing (max 100 tekens):</label>
-        <input type="text" id="solution" maxlength="100" required>
-        <div id="sCount" class="char-count">0 / 100</div>
-        
-        <button type="submit">Puzzel Opslaan</button>
-    </form>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Maker Hub</h2>
+        <button class="tab-button active" onclick="openTab('tab-profile')">⚙️ Profiel & Login</button>
+        <button class="tab-button" onclick="openTab('tab-create')">🧩 Nieuwe Puzzel</button>
+        <button class="tab-button" onclick="openTab('tab-stats')">📊 Mijn Creaties</button>
+        <button class="tab-button" onclick="openTab('tab-economy')">💰 Economie</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+        <!-- TAB 1: Profiel -->
+        <div id="tab-profile" class="tab-panel active">
+            <h3>Account & Instellingen</h3>
+            
+            <div class="profile-layout">
+                <!-- Linker kant: Login / Settings -->
+                <div class="profile-left">
+                    <div id="login-section">
+                        <p style="margin-bottom: 15px;">Log in om je ontwerpen op te slaan en te publiceren.</p>
+                        <button class="btn" style="background-color: #4285F4; width: 100%; margin-bottom: 20px;">Inloggen met Google</button>
+                        
+                        <hr style="border-color: var(--primary); margin: 20px 0;">
+                        
+                        <p style="margin-bottom: 10px;">Of met E-mail:</p>
+                        <div class="form-group">
+                            <input type="email" placeholder="E-mailadres">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" placeholder="Wachtwoord" autocomplete="new-password">
+                        </div>
+                        <button class="btn" style="width: 100%;" onclick="toggleDemoLogin()">Inloggen / Registreren</button>
+                    </div>
+
+                    <!-- Dit gedeelte wordt getoond als je bent ingelogd -->
+                    <div id="profile-section" style="display:none;">
+                        <p style="font-size: 1.2rem; margin-bottom: 20px;">Welkom terug, <strong style="color: var(--accent);">Ontwerper_01</strong>!</p>
+                        
+                        <div class="password-section">
+                            <h4 style="margin-bottom: 15px;">Wachtwoord Wijzigen</h4>
+                            <div class="form-group">
+                                <input type="password" placeholder="Huidig wachtwoord">
+                            </div>
+                            <div class="form-group">
+                                <input type="password" placeholder="Nieuw wachtwoord">
+                            </div>
+                            <div class="form-group">
+                                <input type="password" placeholder="Bevestig nieuw wachtwoord">
+                            </div>
+                            <button class="btn" style="background-color: var(--warning);">Opslaan</button>
+                        </div>
+                        
+                        <br>
+                        <button class="btn" style="background-color: #ff3333; width: 100%;" onclick="toggleDemoLogin()">Uitloggen</button>
+                    </div>
+                </div>
+
+                <!-- Rechter kant: De Graphic / Art -->
+                <div class="profile-right">
+                    <h2 style="margin-bottom: 20px;">Ruimte voor een spannende graphic</h2>
+                    <!-- Placeholder voor de beer/monster tekening -->
+                    <svg width="200" height="200" viewBox="0 0 100 100" fill="none" stroke="var(--success)" stroke-width="4">
+                        <circle cx="50" cy="50" r="30" />
+                        <circle cx="25" cy="25" r="15" />
+                        <circle cx="75" cy="25" r="15" />
+                        <ellipse cx="50" cy="65" rx="15" ry="8" />
+                    </svg>
+                    <p style="margin-top: 20px; color: #aaa; font-size: 0.9rem;">(Hier komt jouw monster/portret of game-logo)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Puzzel Maken -->
+        <div id="tab-create" class="tab-panel">
+            <h3>Nieuwe Puzzel / Kamer Ontwerpen</h3>
+            <form id="puzzle-form">
+                
+                <div class="form-group">
+                    <label>Vraag / Raadsel</label>
+                    <textarea rows="4" placeholder="Typ hier het raadsel of de vraag..." id="draft-question"></textarea>
+                </div>
+
+                <div class="flex-row">
+                    <div class="form-group">
+                        <label>Antwoord Type</label>
+                        <select id="vraag-type" onchange="toggleVraagType()">
+                            <option value="open">Open Vraag (Tekst/Getal)</option>
+                            <option value="meerkeuze">Meerkeuze</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="open-antwoord-veld">
+                        <label>Correcte Antwoord</label>
+                        <input type="text" placeholder="Vul hier het antwoord in">
+                    </div>
+                </div>
+
+                <div id="meerkeuze-opties" style="display: none; background: var(--bg-dark); padding: 15px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid var(--primary);">
+                    <label style="margin-bottom: 10px;">Meerkeuze Opties (vink het juiste antwoord aan)</label>
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <input type="radio" name="correct" value="A" style="width: auto; margin-right: 10px; transform: scale(1.5);"> 
+                        <span style="margin-right: 10px; font-weight: bold;">A:</span> 
+                        <input type="text" placeholder="Optie A">
+                    </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <input type="radio" name="correct" value="B" style="width: auto; margin-right: 10px; transform: scale(1.5);"> 
+                        <span style="margin-right: 10px; font-weight: bold;">B:</span> 
+                        <input type="text" placeholder="Optie B">
+                    </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <input type="radio" name="correct" value="C" style="width: auto; margin-right: 10px; transform: scale(1.5);"> 
+                        <span style="margin-right: 10px; font-weight: bold;">C:</span> 
+                        <input type="text" placeholder="Optie C">
+                    </div>
+                </div>
+
+                <hr style="border-color: var(--primary); margin: 30px 0;">
+                <h4 style="margin-bottom: 15px; color: #aaa;">Regels & Straffen</h4>
+
+                <div class="flex-row">
+                    <div class="form-group">
+                        <label>⏱️ Anti-Google Timer (sec)</label>
+                        <input type="number" placeholder="Bv. 15">
+                    </div>
+                    <div class="form-group">
+                        <label>🏆 Max Punten</label>
+                        <input type="number" placeholder="Bv. 30" id="max-points">
+                    </div>
+                </div>
+
+                <div class="flex-row">
+                    <div class="form-group">
+                        <label>🐔 Chicken Penalty (Vlucht-boete)</label>
+                        <input type="number" placeholder="Bv. 50" id="chicken-penalty">
+                    </div>
+                    <div class="form-group">
+                        <label>❌ Straf per fout antwoord</label>
+                        <input type="number" placeholder="Bv. 10 (wordt als minpunt gerekend)">
+                    </div>
+                </div>
+
+                <hr style="border-color: var(--primary); margin: 30px 0;">
+                <h4 style="margin-bottom: 15px; color: #aaa;">Als de speler faalt...</h4>
+                
+                <div class="flex-row">
+                    <div class="form-group">
+                        <label>Mag de speler het antwoord zien/kopen?</label>
+                        <select id="koop-optie" onchange="togglePrijs()">
+                            <option value="verborgen">Nee, antwoord blijft geheim</option>
+                            <option value="gratis">Ja, toon gratis</option>
+                            <option value="kopen">Ja, tegen betaling (Credits)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="credit-prijs" style="display:none;">
+                        <label>Prijs van het antwoord (Credits)</label>
+                        <input type="number" placeholder="Bv. 5">
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; text-align: right;">
+                    <button type="button" class="btn" style="background-color: #555; margin-right: 10px;" onclick="saveDraft()">💾 Sla concept op (Lokaal)</button>
+                    <button type="button" class="btn" style="background-color: var(--success);">🚀 Publiceer Puzzel (Supabase)</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- TAB 3: Mijn Creaties -->
+        <div id="tab-stats" class="tab-panel">
+            <h3>Mijn Creaties & Statistieken</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4>Totaal Gespeeld</h4>
+                    <p>1.240</p>
+                </div>
+                <div class="stat-card">
+                    <h4>🐔 Lafaards Gevlucht</h4>
+                    <p>342</p>
+                </div>
+                <div class="stat-card" style="border-color: var(--success);">
+                    <h4>Totaal 👍</h4>
+                    <p>89</p>
+                </div>
+            </div>
+
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px; background-color: var(--bg-dark); border-radius: 6px; overflow: hidden;">
+                <tr style="background-color: var(--primary);">
+                    <th style="padding: 15px; text-align: left;">Kamer Naam</th>
+                    <th style="padding: 15px;">Type</th>
+                    <th style="padding: 15px;">Actie</th>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--primary);">
+                    <td style="padding: 15px;">De Trollenbrug</td>
+                    <td style="padding: 15px; text-align: center;">Logica</td>
+                    <td style="padding: 15px; text-align: center;"><button class="btn" style="padding: 8px 16px; margin: 0;">Bewerk</button></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- TAB 4: Economie -->
+        <div id="tab-economy" class="tab-panel">
+            <h3>Mijn Portemonnee</h3>
+            <p>Verdien credits wanneer spelers jouw antwoorden kopen of je kamers liken!</p>
+            <br>
+            <div class="stats-grid">
+                <div class="stat-card" style="border-color: gold;">
+                    <h4>Ontwerpers Credits</h4>
+                    <p style="color: gold;">1.450 🪙</p>
+                </div>
+            </div>
+            <p style="color: #aaa; margin-top: 20px;">Recente inkomsten:</p>
+            <ul style="list-style: none; padding-top: 10px;">
+                <li style="padding: 10px; border-bottom: 1px solid var(--primary);">+5 🪙 (SpelerX kocht antwoord in 'De Trollenbrug')</li>
+                <li style="padding: 10px; border-bottom: 1px solid var(--primary);">+10 🪙 (Nieuwe 👍 gekregen op 'Goblin Raadsel')</li>
+            </ul>
+        </div>
+
+    </div>
 
     <script>
-        console.log("HÉ! IK LAAD DE VOLLEDIGE VERSIE MET COÖRDINATEN!");
-        
-        // Initialiseer Supabase
-        const supabaseUrl = 'https://mgqoxmnryqekrpjglffb.supabase.co/';
-        const supabaseKey = 'sb_publishable_btgAerx5A8O7urSEflRDAg_8NSdtoOu';
-        const dbClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-        // Live teken tellers
-        const qInput = document.getElementById('question');
-        const sInput = document.getElementById('solution');
-        const qCount = document.getElementById('qCount');
-        const sCount = document.getElementById('sCount');
-
-        qInput.addEventListener('input', () => {
-            qCount.textContent = `${qInput.value.length} / 200`;
-        });
-        sInput.addEventListener('input', () => {
-            sCount.textContent = `${sInput.value.length} / 100`;
-        });
-
-        // Hulpfunctie om de tegenovergestelde muur te bepalen
-        function getOppositeWall(wall) {
-            switch (wall) {
-                case 'north': return 'south';
-                case 'south': return 'north';
-                case 'east': return 'west';
-                case 'west': return 'east';
-                default: return null;
-            }
-        }
-
-        // Hulpfunctie om x, y aan te passen op basis van windrichting
-        function getOffset(wall) {
-            switch (wall) {
-                case 'north': return { x: 0, y: 1 };
-                case 'south': return { x: 0, y: -1 };
-                case 'east':  return { x: 1, y: 0 };
-                case 'west':  return { x: -1, y: 0 };
-                default: return { x: 0, y: 0 };
-            }
-        }
-
-        document.getElementById('puzzleForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Tab navigatie
+        function openTab(tabId) {
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
             
-            const question = document.getElementById('question').value;
-            const solution = document.getElementById('solution').value;
-            const directions = ['north', 'south', 'east', 'west'];
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
 
-            // 1. Haal alle bestaande puzzels op uit de database
-            let { data: existingPuzzles, error: fetchError } = await dbClient
-                .from('Puzzle_Labyrinth')
-                .select('room_id, wall_side, pos_x, pos_y');
-
-            if (fetchError) {
-                console.error("Fout bij ophalen labyrinth data:", fetchError);
-                alert('Fout bij ophalen van kamers: ' + fetchError.message);
-                return;
-            }
-
-            // ALS DE TABEL LEEG IS: Maak direct Kamer 1 op (0,0) en koppel Kamer 2
-            if (!existingPuzzles || existingPuzzles.length === 0) {
-                let startWall = 'south';
-                let oppWall = getOppositeWall(startWall);
-                let offset = getOffset(startWall);
-                let targetX = 0 + offset.x;
-                let targetY = 0 + offset.y;
-
-                const { error: insertError } = await dbClient
-                    .from('Puzzle_Labyrinth')
-                    .insert([
-                        {
-                            question: question, solution: solution, likes: 0, is_obsolete: false,
-                            room_id: 1, wall_side: startWall, pos_x: 0, pos_y: 0
-                        },
-                        {
-                            question: question, solution: solution, likes: 0, is_obsolete: false,
-                            room_id: 2, wall_side: oppWall, pos_x: targetX, pos_y: targetY
-                        }
-                    ]);
-                
-                if (insertError) {
-                    alert('Fout bij startpunt: ' + insertError.message);
-                } else {
-                    alert('Start! Gekoppeld tussen Kamer 1 (0,0) en Kamer 2!');
-                    document.getElementById('puzzleForm').reset();
-                    qCount.textContent = "0 / 200";
-                    sCount.textContent = "0 / 100";
-                }
-                return;
-            }
-
-            // 2. Kies een bestaande kamer en een vrije muur
-            let roomIds = [...new Set(existingPuzzles.map(p => p.room_id))];
-            let selectedRoomId = null;
-            let selectedWall = null;
-            let currentRoomCoord = null;
-            let attempts = 0;
-
-            while (!selectedRoomId && attempts < 100) {
-                attempts++;
-                let candidateRoomId = roomIds[Math.floor(Math.random() * roomIds.length)];
-                let roomRecord = existingPuzzles.find(p => p.room_id === candidateRoomId);
-                if (!roomRecord || roomRecord.pos_x === null || roomRecord.pos_y === null) continue;
-
-                let occupiedWalls = existingPuzzles
-                    .filter(p => p.room_id === candidateRoomId)
-                    .map(p => p.wall_side);
-
-                let freeWalls = directions.filter(dir => !occupiedWalls.includes(dir));
-
-                if (freeWalls.length > 0) {
-                    selectedRoomId = candidateRoomId;
-                    currentRoomCoord = { x: roomRecord.pos_x, y: roomRecord.pos_y };
-                    selectedWall = freeWalls[Math.floor(Math.random() * freeWalls.length)];
-                }
-            }
-
-            if (!selectedRoomId || !selectedWall) {
-                alert('Geen vrije muren meer beschikbaar in het huidige labyrinth!');
-                return;
-            }
-
-            let oppositeWall = getOppositeWall(selectedWall);
-            let offset = getOffset(selectedWall);
-            let targetX = currentRoomCoord.x + offset.x;
-            let targetY = currentRoomCoord.y + offset.y;
-
-            // 3. Check in Supabase of er op die coördinaat al een kamer staat
-            let existingTargetRoom = existingPuzzles.find(p => p.pos_x === targetX && p.pos_y === targetY);
-            let targetRoomId;
-
-            if (existingTargetRoom) {
-                targetRoomId = existingTargetRoom.room_id;
-                console.log(`Bestaande kamer hergebruikt op (${targetX}, ${targetY}) -> Kamer ${targetRoomId}`);
+        // Dynamische formulier velden
+        function toggleVraagType() {
+            const type = document.getElementById('vraag-type').value;
+            const meerkeuze = document.getElementById('meerkeuze-opties');
+            const openVeld = document.getElementById('open-antwoord-veld');
+            
+            if (type === 'meerkeuze') {
+                meerkeuze.style.display = 'block';
+                openVeld.style.display = 'none';
             } else {
-                let maxRoomId = Math.max(...roomIds, 0);
-                targetRoomId = maxRoomId + 1;
-                console.log(`Nieuwe kamer aangemaakt -> Kamer ${targetRoomId} op (${targetX}, ${targetY})`);
+                meerkeuze.style.display = 'none';
+                openVeld.style.display = 'block';
             }
+        }
 
-            // 4. Sla beide puzzels op in Supabase
-            const { error } = await dbClient
-                .from('Puzzle_Labyrinth')
-                .insert([
-                    { 
-                        question: question, solution: solution, likes: 0, is_obsolete: false,
-                        room_id: selectedRoomId, wall_side: selectedWall,
-                        pos_x: currentRoomCoord.x, pos_y: currentRoomCoord.y
-                    },
-                    { 
-                        question: question, solution: solution, likes: 0, is_obsolete: false,
-                        room_id: targetRoomId, wall_side: oppositeWall,
-                        pos_x: targetX, pos_y: targetY
-                    }
-                ]);
-
-            if (error) {
-                console.error("Supabase Error:", error);
-                alert('Oeps, fout van Supabase: ' + error.message);
+        function togglePrijs() {
+            const optie = document.getElementById('koop-optie').value;
+            const prijsVeld = document.getElementById('credit-prijs');
+            if (optie === 'kopen') {
+                prijsVeld.style.display = 'block';
             } else {
-                alert(`Puzzel geplaatst tussen Kamer ${selectedRoomId} (${selectedWall}) en Kamer ${targetRoomId} (${oppositeWall}) op (${targetX}, ${targetY})!`);
-                document.getElementById('puzzleForm').reset();
-                qCount.textContent = "0 / 200";
-                sCount.textContent = "0 / 100";
+                prijsVeld.style.display = 'none';
             }
-        });
+        }
+
+        // Simuleer inloggen/uitloggen voor de demo
+        function toggleDemoLogin() {
+            const loginSec = document.getElementById('login-section');
+            const profSec = document.getElementById('profile-section');
+            if (loginSec.style.display !== 'none') {
+                loginSec.style.display = 'none';
+                profSec.style.display = 'block';
+            } else {
+                loginSec.style.display = 'block';
+                profSec.style.display = 'none';
+            }
+        }
+
+        // Simpele LocalStorage Auto-save demonstratie
+        function saveDraft() {
+            const questionText = document.getElementById('draft-question').value;
+            localStorage.setItem('draft_puzzle_question', questionText);
+            alert('Concept lokaal opgeslagen! Je verliest dit niet als je de pagina ververst.');
+        }
+
+        // Laad concept bij openen (indien aanwezig)
+        window.onload = function() {
+            const savedDraft = localStorage.getItem('draft_puzzle_question');
+            if(savedDraft) {
+                document.getElementById('draft-question').value = savedDraft;
+            }
+        }
     </script>
 </body>
 </html>
+"""
+
+with open('/mnt/data/designer_dashboard_v2.html', 'w', encoding='utf-8') as f:
+    f.write(html_content)
+
+print("[file-tag: designer_dashboard_v2.html]")
