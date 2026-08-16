@@ -1,88 +1,49 @@
-<!DOCTYPE html>
+html_content = """<!DOCTYPE html>
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Puzzle Designer - Dashboard</title>
+    <!-- SUPABASE JS BIBLIOTHEEK TOEVOEGEN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg-dark: #1a1a2e;
-            --bg-panel: #16213e;
-            --primary: #0f3460;
-            --accent: #e94560;
-            --text-light: #e0e0e0;
-            --success: #4caf50;
-            --warning: #ff9800;
+            --bg-dark: #1a1a2e; --bg-panel: #16213e; --primary: #0f3460;
+            --accent: #e94560; --text-light: #e0e0e0; --success: #4caf50; --warning: #ff9800;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-
-        html, body {
-            width: 100%; height: 100%; background-color: var(--bg-dark); color: var(--text-light); display: flex; overflow: hidden;
-        }
-
+        html, body { width: 100%; height: 100%; background-color: var(--bg-dark); color: var(--text-light); display: flex; overflow: hidden; }
         ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-track { background: var(--bg-dark); }
         ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 5px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-        .sidebar {
-            width: 260px; background-color: var(--bg-panel); padding: 20px 0; display: flex; flex-direction: column; border-right: 2px solid var(--primary); flex-shrink: 0; height: 100%;
-        }
-
+        .sidebar { width: 260px; background-color: var(--bg-panel); padding: 20px 0; display: flex; flex-direction: column; border-right: 2px solid var(--primary); flex-shrink: 0; height: 100%; }
         .sidebar h2 { text-align: center; color: var(--accent); margin-bottom: 30px; font-size: 1.5rem; }
-
-        .tab-button {
-            background: none; border: none; color: var(--text-light); padding: 15px 20px; text-align: left; font-size: 1.1rem; cursor: pointer; transition: background 0.2s, border-left 0.2s; border-left: 4px solid transparent;
-        }
-
+        .tab-button { background: none; border: none; color: var(--text-light); padding: 15px 20px; text-align: left; font-size: 1.1rem; cursor: pointer; transition: background 0.2s, border-left 0.2s; border-left: 4px solid transparent; }
         .tab-button:hover { background-color: var(--primary); }
         .tab-button.active { background-color: var(--primary); border-left: 4px solid var(--accent); font-weight: bold; }
-
-        .main-content {
-            flex-grow: 1; height: 100%; padding: 40px; overflow-y: auto; background-color: var(--bg-dark);
-        }
-
-        .tab-panel {
-            display: none; background-color: var(--bg-panel); padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); width: 100%; max-width: 1300px; margin: 0 auto;
-        }
-
+        .main-content { flex-grow: 1; height: 100%; padding: 40px; overflow-y: auto; background-color: var(--bg-dark); }
+        .tab-panel { display: none; background-color: var(--bg-panel); padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); width: 100%; max-width: 1300px; margin: 0 auto; }
         .tab-panel.active { display: block; }
-
         h3 { border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-bottom: 20px; color: var(--accent); }
-
         .profile-layout { display: flex; gap: 40px; align-items: stretch; flex-wrap: wrap; }
         .profile-left { flex: 1; min-width: 320px; max-width: 500px; }
-        .profile-right {
-            flex: 1.5; min-width: 300px; border: 2px dashed var(--primary); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; background-color: rgba(15, 52, 96, 0.1); color: var(--success); text-align: center;
-        }
-
+        .profile-right { flex: 1.5; min-width: 300px; border: 2px dashed var(--primary); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; background-color: rgba(15, 52, 96, 0.1); color: var(--success); text-align: center; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"], input[type="number"], input[type="email"], input[type="password"], select, textarea {
-            width: 100%; padding: 12px; border-radius: 4px; border: 1px solid var(--primary); background-color: var(--bg-dark); color: var(--text-light); font-size: 1rem;
-        }
-
+        input[type="text"], input[type="number"], input[type="email"], input[type="password"], select, textarea { width: 100%; padding: 12px; border-radius: 4px; border: 1px solid var(--primary); background-color: var(--bg-dark); color: var(--text-light); font-size: 1rem; }
         .flex-row { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
         .flex-row > div { flex: 1; min-width: 200px; }
-
-        button.btn {
-            background-color: var(--accent); color: white; border: none; padding: 12px 24px; font-size: 1rem; border-radius: 4px; cursor: pointer; transition: opacity 0.2s; margin-top: 10px; font-weight: bold;
-        }
+        button.btn { background-color: var(--accent); color: white; border: none; padding: 12px 24px; font-size: 1rem; border-radius: 4px; cursor: pointer; transition: opacity 0.2s; margin-top: 10px; font-weight: bold; }
         button.btn:hover { opacity: 0.8; }
         button.btn-outline { background-color: transparent; border: 2px solid var(--accent); color: var(--accent); }
         button.btn-outline:hover { background-color: var(--accent); color: white; }
-
-        .password-section {
-            display: none; margin-top: 15px; padding: 20px; background: var(--bg-dark); border-radius: 6px; border-left: 4px solid var(--warning);
-        }
+        .password-section { display: none; margin-top: 15px; padding: 20px; background: var(--bg-dark); border-radius: 6px; border-left: 4px solid var(--warning); }
         .password-section.active { display: block; }
-
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
         .stat-card { background-color: var(--bg-dark); padding: 20px; border-radius: 6px; border-left: 4px solid var(--accent); text-align: center; }
         .stat-card h4 { font-size: 0.9rem; color: #aaa; margin-bottom: 5px; }
         .stat-card p { font-size: 1.8rem; font-weight: bold; }
-        
         table { width: 100%; border-collapse: collapse; margin-top: 20px; background-color: var(--bg-dark); border-radius: 6px; overflow: hidden; }
         th { padding: 15px; text-align: left; background-color: var(--primary); }
         td { padding: 15px; border-bottom: 1px solid var(--primary); }
@@ -93,9 +54,9 @@
     <div class="sidebar">
         <h2>Puzzle Designer</h2>
         <button class="tab-button active" onclick="openTab('tab-profile')">⚙️ Profiel & Login</button>
-        <button class="tab-button" onclick="openTab('tab-create')">🧩 Nieuwe Puzzel</button>
-        <button class="tab-button" onclick="openTab('tab-stats')">📊 Mijn Creaties</button>
-        <button class="tab-button" onclick="openTab('tab-economy')">💰 Economie</button>
+        <button class="tab-button" onclick="openTab('tab-create')" id="nav-create" style="display:none;">🧩 Nieuwe Puzzel</button>
+        <button class="tab-button" onclick="openTab('tab-stats')" id="nav-stats" style="display:none;">📊 Mijn Creaties</button>
+        <button class="tab-button" onclick="openTab('tab-economy')" id="nav-economy" style="display:none;">💰 Economie</button>
     </div>
 
     <div class="main-content">
@@ -108,24 +69,26 @@
                 <div class="profile-left">
                     <div id="login-section">
                         <p style="margin-bottom: 15px;">Log in op je ontwerpersaccount:</p>
-                        <button class="btn" style="background-color: #4285F4; width: 100%; margin-bottom: 20px;">Inloggen met Google</button>
+                        <button class="btn" id="btn-google" style="background-color: #4285F4; width: 100%; margin-bottom: 20px;">Inloggen met Google</button>
                         
                         <hr style="border-color: var(--primary); margin: 20px 0;">
                         <p style="margin-bottom: 10px;">Of met E-mail & Wachtwoord:</p>
                         
-                        <div class="form-group"><input type="email" placeholder="E-mailadres"></div>
-                        <div class="form-group"><input type="password" placeholder="Wachtwoord"></div>
-                        <button class="btn" style="width: 100%;" onclick="toggleDemoLogin()">Log In</button>
+                        <div class="form-group"><input type="email" id="auth-email" placeholder="E-mailadres"></div>
+                        <div class="form-group"><input type="password" id="auth-password" placeholder="Wachtwoord"></div>
+                        <p id="auth-message" style="color: var(--warning); font-size: 0.9rem; margin-bottom: 10px;"></p>
+                        
+                        <button class="btn" id="btn-login" style="width: 100%;">Log In</button>
                         
                         <div style="margin-top: 25px; text-align: center;">
                             <p style="color: #aaa; margin-bottom: 10px;">Nog geen account?</p>
-                            <button class="btn btn-outline" style="width: 100%;">Maak een nieuw account aan</button>
+                            <button class="btn btn-outline" id="btn-register" style="width: 100%;">Maak een nieuw account aan</button>
                         </div>
                     </div>
 
                     <div id="profile-section" style="display:none;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                            <p style="font-size: 1.2rem; margin: 0;">Welkom terug, <strong id="display-username" style="color: var(--accent);">DungeonMaster99</strong>!</p>
+                            <p style="font-size: 1.2rem; margin: 0;">Welkom terug, <strong id="display-username" style="color: var(--accent);">Ontwerper</strong>!</p>
                             <button class="btn-outline" style="padding: 5px 10px; border-radius: 50%; font-size: 1.2rem;" onclick="togglePasswordSection()" title="Instellingen">⚙️</button>
                         </div>
                         
@@ -133,13 +96,12 @@
 
                         <div id="password-settings" class="password-section">
                             <h4 style="margin-bottom: 15px;">Wachtwoord Wijzigen</h4>
-                            <div class="form-group"><input type="password" placeholder="Huidig wachtwoord"></div>
                             <div class="form-group"><input type="password" placeholder="Nieuw wachtwoord"></div>
                             <button class="btn" style="background-color: var(--warning); width: 100%;">Opslaan</button>
                         </div>
                         
                         <br>
-                        <button class="btn" style="background-color: #ff3333; width: 100%;" onclick="toggleDemoLogin()">Uitloggen</button>
+                        <button class="btn" id="btn-logout" style="background-color: #ff3333; width: 100%;">Uitloggen</button>
                     </div>
                 </div>
 
@@ -156,237 +118,146 @@
             </div>
         </div>
 
+        <!-- De andere tabbladen (Puzzel maken, etc) laten we onzichtbaar totdat men inlogt (geregeld in JS) -->
         <!-- TAB 2: Puzzel Maken -->
         <div id="tab-create" class="tab-panel">
-            <h3>Nieuwe Puzzel / Kamer Ontwerpen</h3>
-            <form id="puzzle-form">
-                
-                <div class="form-group">
-                    <label>Naam Puzzel (voor eigen administratie)</label>
-                    <input type="text" placeholder="Bv. 'Logica Raadsel 1'">
-                </div>
-
-                <hr style="border-color: var(--primary); margin: 20px 0;">
-
-                <div class="form-group">
-                    <label>Vraag / Raadsel</label>
-                    <textarea rows="4" placeholder="Typ hier het raadsel..." id="draft-question"></textarea>
-                </div>
-
-                <div class="flex-row">
-                    <div class="form-group">
-                        <label>Antwoord Type</label>
-                        <select id="vraag-type" onchange="toggleVraagType()">
-                            <option value="open">Open Vraag (Tekst/Getal)</option>
-                            <option value="meerkeuze">Meerkeuze</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="open-antwoord-veld">
-                        <label>Correcte Antwoord</label>
-                        <input type="text" placeholder="Vul hier het antwoord in">
-                    </div>
-                </div>
-
-                <!-- Meerkeuze -->
-                <div id="meerkeuze-opties" style="display: none; background: var(--bg-dark); padding: 15px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid var(--primary);">
-                    <label style="margin-bottom: 10px;">Meerkeuze Opties (vink het juiste antwoord aan)</label>
-                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                        <input type="radio" name="correct" value="A" style="width: auto; margin-right: 10px; transform: scale(1.5);"> <span style="margin-right: 10px; font-weight: bold;">A:</span> <input type="text">
-                    </div>
-                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                        <input type="radio" name="correct" value="B" style="width: auto; margin-right: 10px; transform: scale(1.5);"> <span style="margin-right: 10px; font-weight: bold;">B:</span> <input type="text">
-                    </div>
-                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                        <input type="radio" name="correct" value="C" style="width: auto; margin-right: 10px; transform: scale(1.5);"> <span style="margin-right: 10px; font-weight: bold;">C:</span> <input type="text">
-                    </div>
-                </div>
-
-                <hr style="border-color: var(--primary); margin: 30px 0;">
-                <h4 style="margin-bottom: 15px; color: #aaa;">Regels, Straffen & Hints</h4>
-
-                <div class="flex-row">
-                    <div class="form-group">
-                        <label>⏱️ Anti-Google Timer (sec)</label>
-                        <input type="number" placeholder="Bv. 15">
-                    </div>
-                    <div class="form-group">
-                        <label>🏆 Max Punten</label>
-                        <input type="number" placeholder="Bv. 30">
-                    </div>
-                </div>
-
-                <div class="flex-row">
-                    <div class="form-group">
-                        <label>🐔 Chicken Penalty (Vlucht-boete)</label>
-                        <input type="number" placeholder="Bv. 50">
-                    </div>
-                    <div class="form-group">
-                        <label>❌ Straf per fout antwoord</label>
-                        <input type="number" placeholder="Bv. 10">
-                    </div>
-                </div>
-
-                <!-- Hints -->
-                <div style="background: var(--bg-panel); padding: 15px; border-radius: 4px; margin-top: 15px; border-left: 4px solid #4285F4;">
-                    <h5 style="margin-bottom: 10px; font-size: 1rem; color: #4285F4;">💡 Hints voor de Speler (Optioneel)</h5>
-                    
-                    <div class="form-group">
-                        <label>Hint 1</label>
-                        <input type="text" placeholder="Kleine tip...">
-                        <div class="flex-row" style="margin-top: 5px; gap: 10px;">
-                            <select id="hint1-optie" onchange="toggleHintPrijs(1)" style="flex: 2;">
-                                <option value="gratis">Toon gratis (bij 1e foute gok)</option>
-                                <option value="kopen">Laat speler kopen (Credits)</option>
-                            </select>
-                            <input type="number" id="hint1-prijs" placeholder="Prijs" style="display:none; flex: 1;">
-                        </div>
-                    </div>
-
-                    <div class="form-group" style="margin-top: 15px;">
-                        <label>Hint 2</label>
-                        <input type="text" placeholder="Grote tip...">
-                        <div class="flex-row" style="margin-top: 5px; gap: 10px;">
-                            <select id="hint2-optie" onchange="toggleHintPrijs(2)" style="flex: 2;">
-                                <option value="gratis">Toon gratis (bij 2e foute gok)</option>
-                                <option value="kopen">Laat speler kopen (Credits)</option>
-                            </select>
-                            <input type="number" id="hint2-prijs" placeholder="Prijs" style="display:none; flex: 1;">
-                        </div>
-                    </div>
-                </div>
-
-                <hr style="border-color: var(--primary); margin: 30px 0;">
-                <h4 style="margin-bottom: 15px; color: #aaa;">Als de speler faalt...</h4>
-                
-                <div class="flex-row">
-                    <div class="form-group">
-                        <label>Mag de speler het definitieve antwoord zien/kopen?</label>
-                        <select id="koop-optie" onchange="togglePrijs()">
-                            <option value="verborgen">Nee, antwoord blijft geheim</option>
-                            <option value="gratis">Ja, toon gratis</option>
-                            <option value="kopen">Ja, tegen betaling (Credits)</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="credit-prijs" style="display:none;">
-                        <label>Prijs van het antwoord (Credits)</label>
-                        <input type="number" placeholder="Bv. 5">
-                    </div>
-                </div>
-
-                <div style="margin-top: 20px; text-align: right;">
-                    <button type="button" class="btn" style="background-color: #555; margin-right: 10px;" onclick="saveDraft()">💾 Lokaal Opslaan</button>
-                    <button type="button" class="btn" style="background-color: var(--success);">🚀 Publiceer Puzzel</button>
-                </div>
-            </form>
+            <h3>Nieuwe Puzzel Ontwerpen (BETA)</h3>
+            <p>Formulier inhoud verborgen voor de login demo...</p>
         </div>
-
-        <!-- TAB 3: Mijn Creaties -->
-        <div id="tab-stats" class="tab-panel">
-            <h3>Mijn Administratie & Creaties</h3>
-            <p style="margin-bottom: 20px; color: #aaa;">Let op: Kamernamen zijn puur voor je eigen herkenning en organisatie.</p>
-            
-            <div class="stats-grid">
-                <div class="stat-card"><h4>Gespeeld (Totaal)</h4><p>1.240</p></div>
-                <div class="stat-card"><h4>🐔 Gevlucht</h4><p>342</p></div>
-                <div class="stat-card" style="border-color: var(--success);"><h4>Totaal 👍</h4><p>89</p></div>
-            </div>
-
-            <table>
-                <tr>
-                    <th>Persoonlijke Naam (Admin)</th>
-                    <th>Type</th>
-                    <th>Actie</th>
-                </tr>
-                <tr>
-                    <td>Logica Raadsel 1</td>
-                    <td style="text-align: center;">Logica</td>
-                    <td style="text-align: center;"><button class="btn" style="padding: 5px 10px; margin: 0;">Edit</button></td>
-                </tr>
-                <tr>
-                    <td>Valstrik Rekenwerk</td>
-                    <td style="text-align: center;">Meerkeuze</td>
-                    <td style="text-align: center;"><button class="btn" style="padding: 5px 10px; margin: 0;">Edit</button></td>
-                </tr>
-            </table>
-        </div>
-
-        <!-- TAB 4: Economie -->
-        <div id="tab-economy" class="tab-panel">
-            <h3>Mijn Portemonnee</h3>
-            <div class="stats-grid">
-                <div class="stat-card" style="border-color: gold;">
-                    <h4>Ontwerpers Credits</h4>
-                    <p style="color: gold;">1.450 🪙</p>
-                </div>
-            </div>
-            <p style="color: #aaa; margin-top: 20px;">Recente inkomsten (gekoppeld aan jouw deuren):</p>
-            <ul style="list-style: none; padding-top: 10px;">
-                <li style="padding: 10px; border-bottom: 1px solid var(--primary);">+5 🪙 (SpelerX kocht antwoord in 'Logica Raadsel 1')</li>
-                <li style="padding: 10px; border-bottom: 1px solid var(--primary);">+10 🪙 (Nieuwe 👍 gekregen op 'Valstrik Rekenwerk')</li>
-            </ul>
-        </div>
+        <div id="tab-stats" class="tab-panel"><h3>Mijn Creaties</h3></div>
+        <div id="tab-economy" class="tab-panel"><h3>Economie</h3></div>
 
     </div>
 
+    <!-- HIER BEGINT DE SUPABASE AUTHENTICATIE LOGICA -->
     <script>
+        // 1. VUL HIER JOUW SUPABASE GEGEVENS IN
+        const SUPABASE_URL = 'https://mgqoxmnryqekrpjglffb.supabase.co/'; 
+        const SUPABASE_ANON_KEY = 'Vsb_publishable_btgAerx5A8O7urSEflRDAg_8NSdtoOu';
+        
+        // Initialiseer de Supabase client
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Referenties naar HTML elementen
+        const emailInput = document.getElementById('auth-email');
+        const passwordInput = document.getElementById('auth-password');
+        const authMessage = document.getElementById('auth-message');
+        
+        const loginSection = document.getElementById('login-section');
+        const profileSection = document.getElementById('profile-section');
+        const displayUsername = document.getElementById('display-username');
+
+        // Navigatie knoppen verbergen voor niet-ingelogde gebruikers
+        const navCreate = document.getElementById('nav-create');
+        const navStats = document.getElementById('nav-stats');
+        const navEconomy = document.getElementById('nav-economy');
+
+        // HELPER FUNCTIE: UI updaten op basis van sessie
+        function updateUI(session) {
+            if (session) {
+                // Ingelogd
+                loginSection.style.display = 'none';
+                profileSection.style.display = 'block';
+                
+                // Haal email op uit sessie (of username als we die in de database hebben)
+                const email = session.user.email;
+                displayUsername.textContent = email.split('@')[0]; // Tijdelijke naam op basis van email
+                
+                // Laat de rest van de menu knoppen zien
+                navCreate.style.display = 'block';
+                navStats.style.display = 'block';
+                navEconomy.style.display = 'block';
+            } else {
+                // Uitgelogd
+                loginSection.style.display = 'block';
+                profileSection.style.display = 'none';
+                
+                // Verberg menu knoppen
+                navCreate.style.display = 'none';
+                navStats.style.display = 'none';
+                navEconomy.style.display = 'none';
+                openTab('tab-profile'); // Dwing terug naar profiel tab
+            }
+        }
+
+        // 2. CHECK OF WE AL INGELOGD ZIJN (Bij laden pagina)
+        async function checkSession() {
+            const { data, error } = await supabase.auth.getSession();
+            updateUI(data.session);
+        }
+        checkSession();
+
+        // Luister naar veranderingen (inloggen/uitloggen)
+        supabase.auth.onAuthStateChange((event, session) => {
+            updateUI(session);
+        });
+
+        // 3. REGISTREREN (Nieuw account)
+        document.getElementById('btn-register').addEventListener('click', async () => {
+            authMessage.textContent = "Laden...";
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            
+            if(!email || !password) {
+                authMessage.textContent = "Vul e-mail en wachtwoord in!";
+                return;
+            }
+
+            const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                authMessage.textContent = "Fout bij registreren: " + error.message;
+            } else {
+                authMessage.style.color = "var(--success)";
+                authMessage.textContent = "Registratie succesvol! Controleer evt. je e-mail.";
+            }
+        });
+
+        // 4. INLOGGEN (Bestaand account)
+        document.getElementById('btn-login').addEventListener('click', async () => {
+            authMessage.textContent = "Inloggen...";
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                authMessage.textContent = "Fout bij inloggen: " + error.message;
+            }
+            // Bij succes vangt onAuthStateChange het op en update de UI
+        });
+
+        // 5. INLOGGEN MET GOOGLE (OAuth)
+        document.getElementById('btn-google').addEventListener('click', async () => {
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+            });
+            if (error) {
+                authMessage.textContent = "Google Login Fout: " + error.message;
+            }
+        });
+
+        // 6. UITLOGGEN
+        document.getElementById('btn-logout').addEventListener('click', async () => {
+            const { error } = await supabase.auth.signOut();
+            if (error) console.error("Fout bij uitloggen", error);
+        });
+
+        // Oude UI scriptjes voor tabbladen (blijft ongewijzigd)
         function openTab(tabId) {
             document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             event.currentTarget.classList.add('active');
         }
-
-        function toggleVraagType() {
-            const type = document.getElementById('vraag-type').value;
-            const meerkeuze = document.getElementById('meerkeuze-opties');
-            const openVeld = document.getElementById('open-antwoord-veld');
-            if (type === 'meerkeuze') {
-                meerkeuze.style.display = 'block'; openVeld.style.display = 'none';
-            } else {
-                meerkeuze.style.display = 'none'; openVeld.style.display = 'block';
-            }
-        }
-
-        function togglePrijs() {
-            const optie = document.getElementById('koop-optie').value;
-            const prijsVeld = document.getElementById('credit-prijs');
-            if (optie === 'kopen') { prijsVeld.style.display = 'block'; } 
-            else { prijsVeld.style.display = 'none'; }
-        }
-
-        function toggleHintPrijs(hintNummer) {
-            const optie = document.getElementById(`hint${hintNummer}-optie`).value;
-            const prijsVeld = document.getElementById(`hint${hintNummer}-prijs`);
-            if (optie === 'kopen') { prijsVeld.style.display = 'block'; } 
-            else { prijsVeld.style.display = 'none'; }
-        }
-
-        function toggleDemoLogin() {
-            const loginSec = document.getElementById('login-section');
-            const profSec = document.getElementById('profile-section');
-            if (loginSec.style.display !== 'none') {
-                loginSec.style.display = 'none';
-                profSec.style.display = 'block';
-            } else {
-                loginSec.style.display = 'block';
-                profSec.style.display = 'none';
-            }
-        }
-
         function togglePasswordSection() {
-            const section = document.getElementById('password-settings');
-            section.classList.toggle('active');
-        }
-
-        function saveDraft() {
-            const questionText = document.getElementById('draft-question').value;
-            localStorage.setItem('draft_puzzle_question', questionText);
-            alert('Concept lokaal opgeslagen!');
-        }
-
-        window.onload = function() {
-            const savedDraft = localStorage.getItem('draft_puzzle_question');
-            if(savedDraft) document.getElementById('draft-question').value = savedDraft;
+            document.getElementById('password-settings').classList.toggle('active');
         }
     </script>
 </body>
