@@ -20,7 +20,7 @@
         
         .sidebar { width: 260px; background-color: var(--bg-panel); padding: 20px 0; display: flex; flex-direction: column; border-right: 2px solid var(--primary); flex-shrink: 0; height: 100%; }
         .sidebar h2 { text-align: center; color: var(--accent); margin-bottom: 30px; font-size: 1.5rem; }
-        .tab-button { background: none; border: none; color: var(--text-light); padding: 15px 20px; text-align: left; font-size: 1.1rem; cursor: pointer; transition: background 0.2s, border-left 0.2s; border-left: 4px solid transparent; }
+        .tab-button { background: none; border: none; color: var(--text-light); padding: 15px 20px; text-align: left; font-size: 1.1rem; cursor: pointer; transition: background 0.2s, border-left 0.2s; border-left: 4px solid transparent; display: flex; align-items: center; gap: 10px; }
         .tab-button:hover { background-color: var(--primary); }
         .tab-button.active { background-color: var(--primary); border-left: 4px solid var(--accent); font-weight: bold; }
         
@@ -34,7 +34,7 @@
         .profile-right { flex: 1.5; min-width: 300px; border: 2px dashed var(--primary); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; background-color: rgba(15, 52, 96, 0.1); color: var(--success); text-align: center; }
         
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.95rem; }
         input[type="text"], input[type="number"], input[type="email"], input[type="password"], select, textarea { width: 100%; padding: 12px; border-radius: 4px; border: 1px solid var(--primary); background-color: var(--bg-dark); color: var(--text-light); font-size: 1rem; }
         .flex-row { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
         .flex-row > div { flex: 1; min-width: 200px; }
@@ -63,16 +63,14 @@
 
     <div class="main-content">
 
-        <!-- TAB 1: Profiel -->
+        <!-- TAB 1: Profiel & Login -->
         <div id="tab-profile" class="tab-panel active">
             <h3>Account & Instellingen</h3>
             <div class="profile-layout">
                 
                 <div class="profile-left">
                     
-                    <!-- ============================== -->
-                    <!-- SCHERM 1: INLOGGEN             -->
-                    <!-- ============================== -->
+                    <!-- SCHERM 1: INLOGGEN -->
                     <div id="login-form-view">
                         <p style="margin-bottom: 15px;">Log in op je ontwerpersaccount:</p>
                         <button class="btn" id="btn-google" style="background-color: #4285F4; width: 100%; margin-bottom: 20px;">Inloggen met Google</button>
@@ -90,9 +88,7 @@
                         </div>
                     </div>
 
-                    <!-- ============================== -->
-                    <!-- SCHERM 2: REGISTREREN          -->
-                    <!-- ============================== -->
+                    <!-- SCHERM 2: REGISTREREN -->
                     <div id="register-form-view" style="display:none;">
                         <p style="margin-bottom: 15px; font-weight:bold; color: var(--accent);">Nieuw Ontwerpersaccount</p>
                         
@@ -118,15 +114,14 @@
                         </div>
                     </div>
 
-                    <!-- ============================== -->
-                    <!-- SCHERM 3: INGELOGD             -->
-                    <!-- ============================== -->
+                    <!-- SCHERM 3: INGELOGD -->
                     <div id="profile-section" style="display:none;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                             <p style="font-size: 1.2rem; margin: 0;">Welkom terug, <strong id="display-username" style="color: var(--accent);">Ontwerper</strong>!</p>
                             <button class="btn-outline" style="padding: 5px 10px; border-radius: 50%; font-size: 1.2rem;" onclick="togglePasswordSection()" title="Instellingen">⚙️</button>
                         </div>
-                        <p style="font-size: 0.9rem; color: #888; margin-bottom: 20px;">Jouw unieke systeem-ID is veilig gekoppeld op de achtergrond.</p>
+                        <p style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">Jouw unieke Systeem User ID:</p>
+                        <p id="display-user-id" style="font-size: 0.8rem; color: var(--success); background: var(--bg-dark); padding: 8px; border-radius: 4px; word-break: break-all; margin-bottom: 20px; border: 1px solid var(--primary);"></p>
                         
                         <div id="password-settings" class="password-section">
                             <h4 style="margin-bottom: 15px;">Wachtwoord Wijzigen</h4>
@@ -183,16 +178,53 @@
                         <div id="a-counter" class="char-counter">0 / 100 tekens</div>
                     </div>
                 </div>
-                <!-- ... OVERIGE FORMULIER VELDEN ZIJN ONGEWIJZIGD ... -->
+
+                <div class="flex-row">
+                    <div class="form-group">
+                        <label>⏳ Anti-Google Timer (sec)</label>
+                        <input type="number" id="puzzle-timer" placeholder="Bv. 15">
+                    </div>
+                    <div class="form-group">
+                        <label>🏆 Max Punten</label>
+                        <input type="number" id="puzzle-points" placeholder="Bv. 30">
+                    </div>
+                </div>
+
+                <div class="flex-row">
+                    <div class="form-group">
+                        <label>🐔 Chicken Penalty (Vlucht-boete)</label>
+                        <input type="number" id="puzzle-chicken" placeholder="Bv. 50">
+                    </div>
+                    <div class="form-group">
+                        <label>❌ Straf per fout antwoord</label>
+                        <input type="number" id="puzzle-penalty" placeholder="Bv. 10">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>💡 Hints voor de Speler (Optioneel)</label>
+                    <input type="text" id="hint-1" placeholder="Kleine tip..." style="margin-bottom: 8px;">
+                    <input type="text" id="hint-2" placeholder="Grote tip...">
+                </div>
+
                 <div style="margin-top: 20px; text-align: right;">
-                    <button type="button" class="btn" style="background-color: #555; margin-right: 10px;" onclick="saveDraft()">💾 Lokaal Opslaan</button>
-                    <button type="button" class="btn" style="background-color: var(--success);" onclick="alert('Publiceer functie komt hierna!')">🚀 Publiceer Puzzel</button>
+                    <button type="button" class="btn" style="background-color: #555; margin-right: 10px;" onclick="alert('Lokaal opslaan')">💾 Lokaal Opslaan</button>
+                    <button type="button" class="btn" style="background-color: var(--success);" onclick="alert('Publiceer functie gekoppeld aan User ID komt hierna!')">🚀 Publiceer Puzzel</button>
                 </div>
             </form>
         </div>
         
-        <div id="tab-stats" class="tab-panel"><h3>Mijn Administratie & Creaties</h3></div>
-        <div id="tab-economy" class="tab-panel"><h3>Mijn Portemonnee</h3></div>
+        <!-- TAB 3: Statistieken -->
+        <div id="tab-stats" class="tab-panel">
+            <h3>Mijn Administratie & Creaties</h3>
+            <p style="color: #aaa;">Hier zie je straks een overzicht van al jouw ingediende en gepubliceerde puzzels.</p>
+        </div>
+
+        <!-- TAB 4: Economie -->
+        <div id="tab-economy" class="tab-panel">
+            <h3>Mijn Portemonnee & Economie</h3>
+            <p style="color: #aaa;">Beheer hier je verdiende punten, beloningen en inkomsten uit je dungeons.</p>
+        </div>
 
     </div>
 
@@ -214,14 +246,15 @@
             }
         }
 
-        // Status Beheer
+        // Status Beheer & User ID tonen
         function updateUI(session) {
-            if (session) {
+            if (session && session.user) {
                 document.getElementById('login-form-view').style.display = 'none';
                 document.getElementById('register-form-view').style.display = 'none';
                 document.getElementById('profile-section').style.display = 'block';
                 
                 document.getElementById('display-username').textContent = session.user.email.split('@')[0];
+                document.getElementById('display-user-id').textContent = session.user.id; // Cruciaal User ID voor designers!
                 
                 document.getElementById('nav-create').style.display = 'block'; 
                 document.getElementById('nav-stats').style.display = 'block'; 
@@ -231,6 +264,8 @@
                 document.getElementById('register-form-view').style.display = 'none';
                 document.getElementById('profile-section').style.display = 'none';
                 
+                document.getElementById('display-user-id').textContent = '';
+
                 document.getElementById('nav-create').style.display = 'none'; 
                 document.getElementById('nav-stats').style.display = 'none'; 
                 document.getElementById('nav-economy').style.display = 'none';
@@ -246,7 +281,7 @@
 
         supabaseClient.auth.onAuthStateChange((event, session) => { updateUI(session); });
 
-        // LOGICA: REGISTREREN + DATABASE KOPPELING
+        // REGISTREREN
         document.getElementById('btn-register-submit').addEventListener('click', async () => {
             const msgBox = document.getElementById('auth-message-reg');
             msgBox.textContent = "Laden...";
@@ -277,7 +312,7 @@
             }
         });
 
-        // INLOGGEN
+        // INLOGGEN MET EMAIL
         document.getElementById('btn-login').addEventListener('click', async () => {
             const msgBox = document.getElementById('auth-message-login');
             msgBox.textContent = "Inloggen...";
@@ -290,7 +325,7 @@
             if (error) { msgBox.textContent = "Fout bij inloggen: " + error.message; }
         });
 
-// GOOGLE INLOGGEN
+        // GOOGLE INLOGGEN
         document.getElementById('btn-google').addEventListener('click', async () => {
             const { data, error } = await supabaseClient.auth.signInWithOAuth({ 
                 provider: 'google',
@@ -306,17 +341,15 @@
             await supabaseClient.auth.signOut();
         });
 
-        // OVERIGE UI EN TABBLADEN FIX
+        // TABBLADEN WISSELEN
         function openTab(tabId) {
             document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             
-            // OPLOSSING VOOR DE BUG: Check of event wel bestaat (voorkomt de undefined error in console)
             if (typeof event !== 'undefined' && event && event.currentTarget) {
                 event.currentTarget.classList.add('active');
             } else {
-                // Als het script de tab wisselt zonder muisklik, zoek dan de juiste knop in de sidebar
                 const activeBtn = document.querySelector(`button[onclick*="${tabId}"]`);
                 if (activeBtn) activeBtn.classList.add('active');
             }
@@ -334,4 +367,4 @@
         }
     </script>
 </body>
-</html
+</html>
