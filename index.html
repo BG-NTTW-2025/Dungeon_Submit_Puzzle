@@ -290,9 +290,14 @@
             if (error) { msgBox.textContent = "Fout bij inloggen: " + error.message; }
         });
 
-        // GOOGLE INLOGGEN
+// GOOGLE INLOGGEN
         document.getElementById('btn-google').addEventListener('click', async () => {
-            const { data, error } = await supabaseClient.auth.signInWithOAuth({ provider: 'google' });
+            const { data, error } = await supabaseClient.auth.signInWithOAuth({ 
+                provider: 'google',
+                options: {
+                    redirectTo: 'https://bg-nttw-2025.github.io/Dungeon_Submit_Puzzle/'
+                }
+            });
             if (error) { document.getElementById('auth-message-login').textContent = "Google Login Fout: " + error.message; }
         });
 
