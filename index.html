@@ -443,6 +443,13 @@
         }
 
         async function checkSession() {
+            // Vang eventuele tokens op uit de URL na e-mailverificatie (om 404 / lege pagina te voorkomen)
+            const hash = window.location.hash;
+            if (hash && hash.includes('access_token')) {
+                // Supabase handelt de sessie automatisch af via onAuthStateChange, we schonen de URL op
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
             const { data, error } = await supabaseClient.auth.getSession();
             updateUI(data.session);
         }
@@ -450,10 +457,10 @@
 
         supabaseClient.auth.onAuthStateChange((event, session) => { updateUI(session); });
 
-        // REGISTREREN VIA EMAIL (Eerst check of username al bestaat!)
+        // STRIKTE REGISTRATIE: Eerst controleren of de username al bestaat VÓÓRdat Supabase Auth wordt aangeroepen
         document.getElementById('btn-register-submit').addEventListener('click', async () => {
             const msgBox = document.getElementById('auth-message-reg');
-            msgBox.textContent = "Controleren...";
+            msgBox.textContent = "Controleren of gebruikersnaam beschikbaar is...";
             msgBox.style.color = "var(--warning)";
             
             const username = document.getElementById('reg-username').value.trim();
@@ -465,7 +472,7 @@
                 return; 
             }
 
-            // STAP 1: Controleer of de username al bezet is IN DE DATABASE
+            // STAP 1: Strikte database-controle op dubbele username VÓÓR de aanmelding
             const { data: existingUser, error: checkError } = await supabaseClient
                 .from('designers')
                 .select('username')
@@ -473,11 +480,14 @@
                 .maybeSingle();
 
             if (existingUser) {
-                msgBox.textContent = `Fout: De ontwerpersnaam "${username}" is al in gebruik. Kies een andere naam.`;
-                return;
+                msgBox.style.color = "var(--accent)";
+                msgBox.textContent = `❌ De ontwerpersnaam "${username}" is al in gebruik. Kies een andere naam.`;
+                return; // Stopt het proces volledig! Geen account, geen mail.
             }
 
-            // STAP 2: Maak pas de gebruiker aan in Supabase Auth met email redirect naar juiste URL
+            msgBox.textContent = "Account aanmaken...";
+
+            // STAP 2: Pas als de username vrij is, maken we het account aan in Supabase Auth
             const { data, error } = await supabaseClient.auth.signUp({ 
                 email: email, 
                 password: password,
@@ -487,22 +497,24 @@
             });
             
             if (error) { 
+                msgBox.style.color = "var(--accent)";
                 msgBox.textContent = "Fout: " + error.message; 
             } else { 
                 if(data.user) {
-                    // STAP 3: Sla het profiel op
+                    // STAP 3: Sla het profiel direct op met de juiste UID koppeling
                     const { error: dbError } = await supabaseClient.from('designers').insert([
                         { id: data.user.id, username: username }
                     ]);
                     
                     if(dbError) {
                         console.error("Profiel opslaan mislukte:", dbError);
+                        msgBox.style.color = "var(--accent)";
                         msgBox.textContent = "Fout bij opslaan profiel: " + dbError.message;
                         return;
                     }
                 }
                 msgBox.style.color = "var(--success)"; 
-                msgBox.textContent = "Registratie succesvol! Controleer je e-mail om de registratie te bevestigen. Check ook je spam folder"; 
+                msgBox.textContent = "Registratie succesvol! Controleer je e-mail om de registratie te bevestigen. Check ook je spam folder."; 
             }
         });
 
