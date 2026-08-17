@@ -133,8 +133,8 @@
                         <p style="margin-bottom: 15px; font-weight:bold; color: var(--accent);">Nieuw Ontwerpersaccount</p>
                         
                         <div class="form-group">
-                            <label>Kies een Ontwerpersnaam (Username)</label>
-                            <input type="text" id="reg-username" placeholder="Bv. DungeonMaster99">
+                            <label>Kies een Ontwerpersnaam (Username)*</label>
+                            <input type="text" id="reg-username" placeholder="Bv. dm_master456" required>
                         </div>
                         <div class="form-group">
                             <label>E-mailadres</label>
@@ -378,15 +378,27 @@
             }
         }
 
-        // Status Beheer & User ID tonen
-        function updateUI(session) {
+        // Status Beheer & User ID + Username ophalen uit designers tabel
+        async function updateUI(session) {
             if (session && session.user) {
                 document.getElementById('login-form-view').style.display = 'none';
                 document.getElementById('register-form-view').style.display = 'none';
                 document.getElementById('profile-section').style.display = 'block';
                 
-                document.getElementById('display-username').textContent = session.user.email.split('@')[0];
-                document.getElementById('display-user-id').textContent = session.user.id; // Cruciaal User ID
+                document.getElementById('display-user-id').textContent = session.user.id; // Toont unieke UID
+                
+                // Haal de echte gekozen username op uit de designers-tabel op basis van het User ID
+                const { data: designerData, error } = await supabaseClient
+                    .from('designers')
+                    .select('username')
+                    .eq('id', session.user.id)
+                    .single();
+
+                if (designerData && designerData.username) {
+                    document.getElementById('display-username').textContent = designerData.username;
+                } else {
+                    document.getElementById('display-username').textContent = session.user.email.split('@')[0];
+                }
                 
                 document.getElementById('nav-create').style.display = 'flex'; 
                 document.getElementById('nav-stats').style.display = 'flex'; 
@@ -397,6 +409,7 @@
                 document.getElementById('profile-section').style.display = 'none';
                 
                 document.getElementById('display-user-id').textContent = '';
+                document.getElementById('display-username').textContent = 'Ontwerper';
 
                 document.getElementById('nav-create').style.display = 'none'; 
                 document.getElementById('nav-stats').style.display = 'none'; 
@@ -413,13 +426,13 @@
 
         supabaseClient.auth.onAuthStateChange((event, session) => { updateUI(session); });
 
-        // REGISTREREN
+        // REGISTREREN (Verplichte Username + Koppeling naar designers zonder e-mail)
         document.getElementById('btn-register-submit').addEventListener('click', async () => {
             const msgBox = document.getElementById('auth-message-reg');
             msgBox.textContent = "Laden...";
             msgBox.style.color = "var(--warning)";
             
-            const username = document.getElementById('reg-username').value;
+            const username = document.getElementById('reg-username').value.trim();
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-password').value;
             
@@ -428,16 +441,23 @@
                 return; 
             }
 
+            // 1. Maak de gebruiker aan in Supabase Auth
             const { data, error } = await supabaseClient.auth.signUp({ email: email, password: password });
             
             if (error) { 
                 msgBox.textContent = "Fout: " + error.message; 
             } else { 
                 if(data.user) {
+                    // 2. Sla direct de gekoppelde username en het unieke User ID op in de designers-tabel (zonder e-mail)
                     const { error: dbError } = await supabaseClient.from('designers').insert([
-                        { id: data.user.id, username: username, email: email }
+                        { id: data.user.id, username: username }
                     ]);
-                    if(dbError) console.error("Kon username niet in database opslaan:", dbError);
+                    
+                    if(dbError) {
+                        console.error("Kon username niet in database opslaan:", dbError);
+                        msgBox.textContent = "Let op account is gemaakt, maar opslaan profiel gaf een fout: " + dbError.message;
+                        return;
+                    }
                 }
                 msgBox.style.color = "var(--success)"; 
                 msgBox.textContent = "Registratie succesvol! Je bent direct ingelogd."; 
