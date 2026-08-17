@@ -59,6 +59,10 @@
             flex: 1.5; min-width: 300px; border: 2px dashed var(--primary); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; background-color: rgba(15, 52, 96, 0.1); color: var(--success); text-align: center;
         }
 
+        .avatar-preview-img {
+            width: 180px; height: 180px; border-radius: 50%; object-fit: cover; border: 4px solid var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.5); display: none;
+        }
+
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
         input[type="text"], input[type="number"], input[type="email"], input[type="password"], select, textarea {
@@ -97,7 +101,6 @@
         <button class="tab-button active" onclick="openTab('tab-profile')">⚙️ Profiel & Login</button>
         <button class="tab-button" onclick="openTab('tab-create')" id="nav-create" style="display:none;">🧩 Nieuwe Puzzel</button>
         <button class="tab-button" onclick="openTab('tab-stats')" id="nav-stats" style="display:none;">📊 Mijn Creaties</button>
-        <button class="tab-button" onclick="openTab('tab-economy')" id="nav-economy" style="display:none;">💰 Economie</button>
     </div>
 
     <div class="main-content">
@@ -176,7 +179,17 @@
                         </div>
                         
                         <p style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">Jouw unieke Systeem User ID:</p>
-                        <p id="display-user-id" style="font-size: 0.8rem; color: var(--success); background: var(--bg-dark); padding: 8px; border-radius: 4px; word-break: break-all; margin-bottom: 20px; border: 1px solid var(--primary);"></p>
+                        <p id="display-user-id" style="font-size: 0.8rem; color: var(--success); background: var(--bg-dark); padding: 8px; border-radius: 4px; word-break: break-all; margin-bottom: 15px; border: 1px solid var(--primary);"></p>
+
+                        <!-- AVATAR URL INVOEREN -->
+                        <div class="form-group" style="margin-top: 15px;">
+                            <label style="font-size: 0.9rem;">Avatar Afbeeldings-URL</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="profile-avatar-url" placeholder="https://voorbeeld.nl/mijn-avatar.png">
+                                <button class="btn" id="btn-save-avatar" style="margin: 0; padding: 10px 15px;">Opslaan</button>
+                            </div>
+                            <p id="avatar-save-msg" style="font-size: 0.8rem; margin-top: 5px;"></p>
+                        </div>
 
                         <div id="password-settings" class="password-section">
                             <h4 style="margin-bottom: 15px;">Wachtwoord Wijzigen</h4>
@@ -197,13 +210,18 @@
 
                 <div class="profile-right">
                     <h2 style="margin-bottom: 20px;">Jouw Avatar</h2>
-                    <svg width="200" height="200" viewBox="0 0 100 100" fill="none" stroke="var(--success)" stroke-width="4">
+                    
+                    <!-- Echte Avatar Afbeelding (indien ingesteld) -->
+                    <img id="avatar-img-preview" class="avatar-preview-img" alt="Designer Avatar" onerror="this.style.display='none'; document.getElementById('avatar-svg-placeholder').style.display='block';">
+
+                    <!-- Standaard SVG Placeholder (indien geen URL) -->
+                    <svg id="avatar-svg-placeholder" width="180" height="180" viewBox="0 0 100 100" fill="none" stroke="var(--success)" stroke-width="4">
                         <path d="M50 10 L90 30 L90 70 L50 90 L10 70 L10 30 Z" />
                         <circle cx="35" cy="45" r="5" fill="var(--success)"/>
                         <circle cx="65" cy="45" r="5" fill="var(--success)"/>
                         <path d="M40 65 Q50 75 60 65" stroke-linecap="round"/>
                     </svg>
-                    <p style="margin-top: 20px; color: #aaa; font-size: 0.9rem;">Upload of kies hier straks je eigen profielfoto/icoon.</p>
+                    <p id="avatar-caption-text" style="margin-top: 20px; color: #aaa; font-size: 0.9rem;">Voer links een afbeeldings-URL in om je eigen avatar te tonen.</p>
                 </div>
             </div>
         </div>
@@ -222,35 +240,12 @@
 
                 <div class="form-group">
                     <label>Vraag / Raadsel</label>
-                    <textarea rows="4" placeholder="Typ hier het raadsel..." id="draft-question"></textarea>
+                    <textarea rows="4" placeholder="Typ hier het raadsel... (Tip: voor meerkeuze, schrijf de keuzes in de tekst, bv. A) ..., B) ...)" id="draft-question"></textarea>
                 </div>
 
-                <div class="flex-row">
-                    <div class="form-group">
-                        <label>Antwoord Type</label>
-                        <select id="vraag-type" onchange="toggleVraagType()">
-                            <option value="open">Open Vraag (Tekst/Getal)</option>
-                            <option value="meerkeuze">Meerkeuze</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="open-antwoord-veld">
-                        <label>Correcte Antwoord</label>
-                        <input type="text" id="draft-answer" placeholder="Vul hier het antwoord in">
-                    </div>
-                </div>
-
-                <!-- Meerkeuze -->
-                <div id="meerkeuze-opties" style="display: none; background: var(--bg-dark); padding: 15px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid var(--primary);">
-                    <label style="margin-bottom: 10px;">Meerkeuze Opties (vink het juiste antwoord aan)</label>
-                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                        <input type="radio" name="correct" value="A" style="width: auto; margin-right: 10px; transform: scale(1.5);"> <span style="margin-right: 10px; font-weight: bold;">A:</span> <input type="text">
-                    </div>
-                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                        <input type="radio" name="correct" value="B" style="width: auto; margin-right: 10px; transform: scale(1.5);"> <span style="margin-right: 10px; font-weight: bold;">B:</span> <input type="text">
-                    </div>
-                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                        <input type="radio" name="correct" value="C" style="width: auto; margin-right: 10px; transform: scale(1.5);"> <span style="margin-right: 10px; font-weight: bold;">C:</span> <input type="text">
-                    </div>
+                <div class="form-group">
+                    <label>Correcte Antwoord (Tip: gebruik bij meerkeuze de letter A, B of C)</label>
+                    <input type="text" id="draft-answer" placeholder="Vul hier het juiste antwoord in">
                 </div>
 
                 <hr style="border-color: var(--primary); margin: 30px 0;">
@@ -259,22 +254,22 @@
                 <div class="flex-row">
                     <div class="form-group">
                         <label>⏱️ Anti-Google Timer (sec)</label>
-                        <input type="number" id="puzzle-timer" placeholder="Bv. 15">
+                        <input type="number" id="puzzle-timer" value="15" placeholder="Bv. 15">
                     </div>
                     <div class="form-group">
                         <label>🏆 Max Punten</label>
-                        <input type="number" id="puzzle-points" placeholder="Bv. 30">
+                        <input type="number" id="puzzle-points" value="30" placeholder="Bv. 30">
                     </div>
                 </div>
 
                 <div class="flex-row">
                     <div class="form-group">
                         <label>🐔 Chicken Penalty (Vlucht-boete)</label>
-                        <input type="number" id="puzzle-chicken" placeholder="Bv. 50">
+                        <input type="number" id="puzzle-chicken" value="50" placeholder="Bv. 50">
                     </div>
                     <div class="form-group">
                         <label>❌ Straf per fout antwoord</label>
-                        <input type="number" id="puzzle-penalty" placeholder="Bv. 10">
+                        <input type="number" id="puzzle-penalty" value="10" placeholder="Bv. 10">
                     </div>
                 </div>
 
@@ -283,26 +278,24 @@
                     <h5 style="margin-bottom: 10px; font-size: 1rem; color: #4285F4;">💡 Hints voor de Speler (Optioneel)</h5>
                     
                     <div class="form-group">
-                        <label>Hint 1</label>
+                        <label>Hint 1 (Getoond bij 1e foute gok)</label>
                         <input type="text" id="hint-1" placeholder="Kleine tip...">
-                        <div class="flex-row" style="margin-top: 5px; gap: 10px;">
-                            <select id="hint1-optie" onchange="toggleHintPrijs(1)" style="flex: 2;">
-                                <option value="gratis">Toon gratis (bij 1e foute gok)</option>
+                        <div style="margin-top: 5px;">
+                            <select id="hint1-optie">
+                                <option value="gratis">Gratis tonen</option>
                                 <option value="kopen">Laat speler kopen (Credits)</option>
                             </select>
-                            <input type="number" id="hint1-prijs" placeholder="Prijs" style="display:none; flex: 1;">
                         </div>
                     </div>
 
                     <div class="form-group" style="margin-top: 15px;">
-                        <label>Hint 2</label>
+                        <label>Hint 2 (Getoond bij 2e foute gok)</label>
                         <input type="text" id="hint-2" placeholder="Grote tip...">
-                        <div class="flex-row" style="margin-top: 5px; gap: 10px;">
-                            <select id="hint2-optie" onchange="toggleHintPrijs(2)" style="flex: 2;">
-                                <option value="gratis">Toon gratis (bij 2e foute gok)</option>
+                        <div style="margin-top: 5px;">
+                            <select id="hint2-optie">
+                                <option value="gratis">Gratis tonen</option>
                                 <option value="kopen">Laat speler kopen (Credits)</option>
                             </select>
-                            <input type="number" id="hint2-prijs" placeholder="Prijs" style="display:none; flex: 1;">
                         </div>
                     </div>
                 </div>
@@ -310,19 +303,13 @@
                 <hr style="border-color: var(--primary); margin: 30px 0;">
                 <h4 style="margin-bottom: 15px; color: #aaa;">Als de speler faalt...</h4>
                 
-                <div class="flex-row">
-                    <div class="form-group">
-                        <label>Mag de speler het definitieve antwoord zien/kopen?</label>
-                        <select id="koop-optie" onchange="togglePrijs()">
-                            <option value="verborgen">Nee, antwoord blijft geheim</option>
-                            <option value="gratis">Ja, toon gratis</option>
-                            <option value="kopen">Ja, tegen betaling (Credits)</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="credit-prijs" style="display:none;">
-                        <label>Prijs van het antwoord (Credits)</label>
-                        <input type="number" placeholder="Bv. 5">
-                    </div>
+                <div class="form-group">
+                    <label>Mag de speler na 3 fouten het definitieve antwoord zien/kopen?</label>
+                    <select id="koop-optie">
+                        <option value="free_answer" selected>Ja, toon gratis</option>
+                        <option value="no_answer">Nee, antwoord blijft geheim</option>
+                        <option value="paid_answer">Ja, tegen betaling (Credits)</option>
+                    </select>
                 </div>
 
                 <div style="margin-top: 20px; text-align: right;">
@@ -332,50 +319,40 @@
             </form>
         </div>
 
-        <!-- TAB 3: Mijn Creaties -->
+        <!-- TAB 3: Mijn Creaties (Inclusief samengevoegde Credits & Likes) -->
         <div id="tab-stats" class="tab-panel">
             <h3>Mijn Administratie & Creaties</h3>
-            <p style="margin-bottom: 20px; color: #aaa;">Let op: Kamernamen zijn puur voor je eigen herkenning en organisatie.</p>
+            <p style="margin-bottom: 20px; color: #aaa;">Beheer hier al je kamers, scores en actieve ontwerpers-credits.</p>
             
             <div class="stats-grid">
-                <div class="stat-card"><h4>Gespeeld (Totaal)</h4><p>1.240</p></div>
-                <div class="stat-card"><h4>🐔 Gevlucht</h4><p>342</p></div>
-                <div class="stat-card" style="border-color: var(--success);"><h4>Totaal 👍</h4><p>89</p></div>
+                <div class="stat-card" style="border-color: #4285F4;">
+                    <h4>Actieve Puzzels</h4>
+                    <p id="stat-total-puzzles">0</p>
+                </div>
+                <div class="stat-card" style="border-color: gold;">
+                    <h4>Mijn Credits</h4>
+                    <p id="stat-total-credits" style="color: gold;">0 🪙</p>
+                </div>
+                <div class="stat-card" style="border-color: var(--success);">
+                    <h4>Totaal Ontvangen Likes 👍</h4>
+                    <p id="stat-total-likes" style="color: var(--success);">0</p>
+                </div>
             </div>
 
             <table>
-                <tr>
-                    <th>Persoonlijke Naam (Admin)</th>
-                    <th>Type</th>
-                    <th>Actie</th>
-                </tr>
-                <tr>
-                    <td>Logica Raadsel 1</td>
-                    <td style="text-align: center;">Logica</td>
-                    <td style="text-align: center;"><button class="btn" style="padding: 5px 10px; margin: 0;">Edit</button></td>
-                </tr>
-                <tr>
-                    <td>Valstrik Rekenwerk</td>
-                    <td style="text-align: center;">Meerkeuze</td>
-                    <td style="text-align: center;"><button class="btn" style="padding: 5px 10px; margin: 0;">Edit</button></td>
-                </tr>
+                <thead>
+                    <tr>
+                        <th>Puzzelnaam (Admin)</th>
+                        <th style="text-align: center;">Likes 👍</th>
+                        <th style="text-align: center;">Actie</th>
+                    </tr>
+                </thead>
+                <tbody id="designer-puzzles-table">
+                    <tr>
+                        <td colspan="3" style="text-align: center; color: #888;">Nog geen puzzels gevonden. Maak er een aan bij 'Nieuwe Puzzel'!</td>
+                    </tr>
+                </tbody>
             </table>
-        </div>
-
-        <!-- TAB 4: Economie -->
-        <div id="tab-economy" class="tab-panel">
-            <h3>Mijn Portemonnee</h3>
-            <div class="stats-grid">
-                <div class="stat-card" style="border-color: gold;">
-                    <h4>Ontwerpers Credits</h4>
-                    <p style="color: gold;">1.450 🪙</p>
-                </div>
-            </div>
-            <p style="color: #aaa; margin-top: 20px;">Recente inkomsten (gekoppeld aan jouw deuren):</p>
-            <ul style="list-style: none; padding-top: 10px;">
-                <li style="padding: 10px; border-bottom: 1px solid var(--primary);">+5 🪙 (SpelerX kocht antwoord in 'Logica Raadsel 1')</li>
-                <li style="padding: 10px; border-bottom: 1px solid var(--primary);">+10 🪙 (Nieuwe 👍 gekregen op 'Valstrik Rekenwerk')</li>
-            </ul>
         </div>
 
     </div>
@@ -402,12 +379,33 @@
             }
         }
 
-        // Status Beheer & Controleer of Google-gebruiker al een username heeft
+        // Avatar Weergave Helper
+        function renderAvatar(avatarUrl) {
+            const imgElem = document.getElementById('avatar-img-preview');
+            const svgPlaceholder = document.getElementById('avatar-svg-placeholder');
+            const caption = document.getElementById('avatar-caption-text');
+            const inputField = document.getElementById('profile-avatar-url');
+
+            if (avatarUrl && avatarUrl.trim() !== '') {
+                imgElem.src = avatarUrl.trim();
+                imgElem.style.display = 'block';
+                svgPlaceholder.style.display = 'none';
+                caption.textContent = "Dit is jouw actieve ontwerpersavatar.";
+                inputField.value = avatarUrl.trim();
+            } else {
+                imgElem.style.display = 'none';
+                svgPlaceholder.style.display = 'block';
+                caption.textContent = "Voer links een afbeeldings-URL in om je eigen avatar te tonen.";
+                inputField.value = '';
+            }
+        }
+
+        // Status Beheer & Profiel Gegevens Laden
         async function updateUI(session) {
             if (session && session.user) {
                 const { data: designerData, error } = await supabaseClient
                     .from('designers')
-                    .select('username')
+                    .select('*')
                     .eq('id', session.user.id)
                     .single();
 
@@ -427,26 +425,66 @@
                 document.getElementById('display-user-id').textContent = session.user.id;
                 document.getElementById('display-username').textContent = designerData.username;
                 
+                // Avatar inladen
+                renderAvatar(designerData.avatar);
+
+                // Statistieken & Credits bijwerken
+                document.getElementById('stat-total-credits').textContent = (designerData.credits_balance || 0) + ' 🪙';
+
                 document.getElementById('nav-create').style.display = 'flex'; 
                 document.getElementById('nav-stats').style.display = 'flex'; 
-                document.getElementById('nav-economy').style.display = 'flex';
+                
+                // Laad de puzzels van deze designer in
+                loadDesignerPuzzles(session.user.id);
             } else {
                 toggleAuthView('login');
                 document.getElementById('display-user-id').textContent = '';
                 document.getElementById('display-username').textContent = 'Ontwerper';
+                renderAvatar(null);
 
                 document.getElementById('nav-create').style.display = 'none'; 
                 document.getElementById('nav-stats').style.display = 'none'; 
-                document.getElementById('nav-economy').style.display = 'none';
                 openTab('tab-profile');
             }
         }
 
+        // Dynamisch Puzzels en Totale Likes ophalen
+        async function loadDesignerPuzzles(designerId) {
+            const { data: puzzles, error } = await supabaseClient
+                .from('Puzzle_Labyrinth')
+                .select('*')
+                .eq('designer_id', designerId);
+
+            const tableBody = document.getElementById('designer-puzzles-table');
+            const countElem = document.getElementById('stat-total-puzzles');
+            const likesElem = document.getElementById('stat-total-likes');
+
+            if (puzzles && puzzles.length > 0) {
+                countElem.textContent = puzzles.length;
+                let totalLikes = 0;
+                tableBody.innerHTML = '';
+
+                puzzles.forEach(p => {
+                    totalLikes += (p.likes || 0);
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${p.puzzle_name || 'Naamloze Puzzel'}</td>
+                        <td style="text-align: center; color: var(--success); font-weight: bold;">${p.likes || 0} 👍</td>
+                        <td style="text-align: center;"><button class="btn" style="padding: 5px 10px; margin: 0;">Edit</button></td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                likesElem.textContent = totalLikes;
+            } else {
+                countElem.textContent = '0';
+                likesElem.textContent = '0';
+                tableBody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #888;">Nog geen puzzels gevonden. Maak er een aan bij 'Nieuwe Puzzel'!</td></tr>`;
+            }
+        }
+
         async function checkSession() {
-            // Vang eventuele tokens op uit de URL na e-mailverificatie (om 404 / lege pagina te voorkomen)
             const hash = window.location.hash;
             if (hash && hash.includes('access_token')) {
-                // Supabase handelt de sessie automatisch af via onAuthStateChange, we schonen de URL op
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
 
@@ -457,7 +495,32 @@
 
         supabaseClient.auth.onAuthStateChange((event, session) => { updateUI(session); });
 
-        // STRIKTE REGISTRATIE: Eerst controleren of de username al bestaat VÓÓRdat Supabase Auth wordt aangeroepen
+        // AVATAR URL OPSLAAN
+        document.getElementById('btn-save-avatar').addEventListener('click', async () => {
+            const avatarUrl = document.getElementById('profile-avatar-url').value.trim();
+            const msg = document.getElementById('avatar-save-msg');
+            msg.textContent = "Opslaan...";
+            msg.style.color = "var(--warning)";
+
+            const { data: sessionData } = await supabaseClient.auth.getSession();
+            if (sessionData && sessionData.session) {
+                const { error } = await supabaseClient
+                    .from('designers')
+                    .update({ avatar: avatarUrl })
+                    .eq('id', sessionData.session.user.id);
+
+                if (error) {
+                    msg.style.color = "var(--accent)";
+                    msg.textContent = "Fout bij opslaan: " + error.message;
+                } else {
+                    msg.style.color = "var(--success)";
+                    msg.textContent = "Avatar succesvol bijgewerkt!";
+                    renderAvatar(avatarUrl);
+                }
+            }
+        });
+
+        // REGISTREREN VIA EMAIL
         document.getElementById('btn-register-submit').addEventListener('click', async () => {
             const msgBox = document.getElementById('auth-message-reg');
             msgBox.textContent = "Controleren of gebruikersnaam beschikbaar is...";
@@ -472,8 +535,7 @@
                 return; 
             }
 
-            // STAP 1: Strikte database-controle op dubbele username VÓÓR de aanmelding
-            const { data: existingUser, error: checkError } = await supabaseClient
+            const { data: existingUser } = await supabaseClient
                 .from('designers')
                 .select('username')
                 .eq('username', username)
@@ -482,12 +544,11 @@
             if (existingUser) {
                 msgBox.style.color = "var(--accent)";
                 msgBox.textContent = `❌ De ontwerpersnaam "${username}" is al in gebruik. Kies een andere naam.`;
-                return; // Stopt het proces volledig! Geen account, geen mail.
+                return;
             }
 
             msgBox.textContent = "Account aanmaken...";
 
-            // STAP 2: Pas als de username vrij is, maken we het account aan in Supabase Auth
             const { data, error } = await supabaseClient.auth.signUp({ 
                 email: email, 
                 password: password,
@@ -501,7 +562,6 @@
                 msgBox.textContent = "Fout: " + error.message; 
             } else { 
                 if(data.user) {
-                    // STAP 3: Sla het profiel direct op met de juiste UID koppeling
                     const { error: dbError } = await supabaseClient.from('designers').insert([
                         { id: data.user.id, username: username }
                     ]);
@@ -518,7 +578,7 @@
             }
         });
 
-        // GOOGLE-GEBRUIKERSNAAM OPSLAAN (Voor nieuwe Google-accounts)
+        // GOOGLE-GEBRUIKERSNAAM OPSLAAN
         document.getElementById('btn-save-google-username').addEventListener('click', async () => {
             const msgBox = document.getElementById('auth-message-google');
             const username = document.getElementById('google-reg-username').value.trim();
@@ -528,7 +588,6 @@
                 return;
             }
 
-            // Controleer of deze naam al bestaat
             const { data: existingUser } = await supabaseClient
                 .from('designers')
                 .select('username')
@@ -597,31 +656,6 @@
                 const activeBtn = document.querySelector(`button[onclick*="${tabId}"]`);
                 if (activeBtn) activeBtn.classList.add('active');
             }
-        }
-
-        function toggleVraagType() {
-            const type = document.getElementById('vraag-type').value;
-            const meerkeuze = document.getElementById('meerkeuze-opties');
-            const openVeld = document.getElementById('open-antwoord-veld');
-            if (type === 'meerkeuze') {
-                meerkeuze.style.display = 'block'; openVeld.style.display = 'none';
-            } else {
-                meerkeuze.style.display = 'none'; openVeld.style.display = 'block';
-            }
-        }
-
-        function togglePrijs() {
-            const optie = document.getElementById('koop-optie').value;
-            const prijsVeld = document.getElementById('credit-prijs');
-            if (optie === 'kopen') { prijsVeld.style.display = 'block'; } 
-            else { prijsVeld.style.display = 'none'; }
-        }
-
-        function toggleHintPrijs(hintNummer) {
-            const optie = document.getElementById(`hint${hintNummer}-optie`).value;
-            const prijsVeld = document.getElementById(`hint${hintNummer}-prijs`);
-            if (optie === 'kopen') { prijsVeld.style.display = 'block'; } 
-            else { prijsVeld.style.display = 'none'; }
         }
 
         function togglePasswordSection() {
