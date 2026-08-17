@@ -450,7 +450,7 @@
                     totalLikes += (p.likes || 0);
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${p.puzzle_name || 'Naamloze Puzzel'}</td>
+                        <td>${p.puzzle_name || 'New Puzzle'}</td>
                         <td style="text-align: center; color: var(--success); font-weight: bold;">${p.likes || 0} 👍</td>
                         <td style="text-align: center;"><button class="btn" style="padding: 5px 10px; margin: 0;">Edit</button></td>
                     `;
@@ -477,10 +477,31 @@
 
         supabaseClient.auth.onAuthStateChange((event, session) => { updateUI(session); });
 
-        // PUZZEL PUBLICEREN NAAR SUPABASE
+        // Hulpfuncties voor labyrint coördinaten
+        function getOppositeWall(wall) {
+            switch (wall) {
+                case 'north': return 'south';
+                case 'south': return 'north';
+                case 'east': return 'west';
+                case 'west': return 'east';
+                default: return null;
+            }
+        }
+
+        function getOffset(wall) {
+            switch (wall) {
+                case 'north': return { x: 0, y: 1 };
+                case 'south': return { x: 0, y: -1 };
+                case 'east':  return { x: 1, y: 0 };
+                case 'west':  return { x: -1, y: 0 };
+                default: return { x: 0, y: 0 };
+            }
+        }
+
+        // PUZZEL PUBLICEREN MET AUTOMATISCHE LABYRINT & COÖRDINATEN LOGICA
         document.getElementById('btn-publish-puzzle').addEventListener('click', async () => {
             const msgBox = document.getElementById('publish-message');
-            msgBox.textContent = "Puzzel publiceren...";
+            msgBox.textContent = "Labyrint analyseren en puzzel publiceren...";
             msgBox.style.color = "var(--warning)";
 
             if (!currentUserId) {
@@ -488,7 +509,7 @@
                 return;
             }
 
-            const puzzleName = document.getElementById('puzzle-name').value.trim();
+            const puzzleName = document.getElementById('puzzle-name').value.trim() || 'New Puzzle';
             const question = document.getElementById('draft-question').value.trim();
             const answer = document.getElementById('draft-answer').value.trim();
             const timer = parseInt(document.getElementById('puzzle-timer').value) || 15;
@@ -499,37 +520,128 @@
             const hint2 = document.getElementById('hint-2').value.trim();
             const revealAnswer = document.getElementById('reveal-answer-optie').value;
 
-            if (!puzzleName || !question || !answer) {
-                msgBox.textContent = "Vul minimaal de puzzelnaam, vraag en het correcte antwoord in!";
+            if (!question || !answer) {
+                msgBox.textContent = "Vul minimaal de vraag en het correcte antwoord in!";
                 return;
             }
 
+            const directions = ['north', 'south', 'east', 'west'];
+
+            // 1. Haal alle bestaande puzzels op uit het labyrint
+            let { data: existingPuzzles, error: fetchError } = await supabaseClient
+                .from('Puzzle_Labyrinth')
+                .select('room_id, wall_side, pos_x, pos_y');
+
+            if (fetchError) {
+                msgBox.style.color = "var(--accent)";
+                msgBox.textContent = "Fout bij ophalen labyrinth: " + fetchError.message;
+                return;
+            }
+
+            let selectedRoomId, selectedWall, currentRoomCoord, targetX, targetY, targetRoomId, oppositeWall;
+
+            // ALS HET LABYRINT LEEG IS: Maak Kamer 1 op (0,0)
+            if (!existingPuzzles || existingPuzzles.length === 0) {
+                selectedRoomId = 1;
+                selectedWall = 'south';
+                currentRoomCoord = { x: 0, y: 0 };
+                oppositeWall = getOppositeWall(selectedWall);
+                let offset = getOffset(selectedWall);
+                targetX = offset.x;
+                targetY = offset.y;
+                targetRoomId = 2;
+            } else {
+                // Zoek een bestaande kamer met een vrije muur
+                let roomIds = [...new Set(existingPuzzles.map(p => p.room_id))];
+                let attempts = 0;
+
+                while (!selectedRoomId && attempts < 100) {
+                    attempts++;
+                    let candidateRoomId = roomIds[Math.floor(Math.random() * roomIds.length)];
+                    let roomRecord = existingPuzzles.find(p => p.room_id === candidateRoomId);
+                    if (!roomRecord || roomRecord.pos_x === null || roomRecord.pos_y === null) continue;
+
+                    let occupiedWalls = existingPuzzles
+                        .filter(p => p.room_id === candidateRoomId)
+                        .map(p => p.wall_side);
+
+                    let freeWalls = directions.filter(dir => !occupiedWalls.includes(dir));
+
+                    if (freeWalls.length > 0) {
+                        selectedRoomId = candidateRoomId;
+                        currentRoomCoord = { x: roomRecord.pos_x, y: roomRecord.pos_y };
+                        selectedWall = freeWalls[Math.floor(Math.random() * freeWalls.length)];
+                    }
+                }
+
+                if (!selectedRoomId || !selectedWall) {
+                    msgBox.style.color = "var(--accent)";
+                    msgBox.textContent = "Geen vrije muren meer beschikbaar in het labyrint!";
+                    return;
+                }
+
+                oppositeWall = getOppositeWall(selectedWall);
+                let offset = getOffset(selectedWall);
+                targetX = currentRoomCoord.x + offset.x;
+                targetY = currentRoomCoord.y + offset.y;
+
+                let existingTargetRoom = existingPuzzles.find(p => p.pos_x === targetX && p.pos_y === targetY);
+                if (existingTargetRoom) {
+                    targetRoomId = existingTargetRoom.room_id;
+                } else {
+                    targetRoomId = Math.max(...roomIds, 0) + 1;
+                }
+            }
+
+            // 2. Sla de dubbele deur-verbinding op in Supabase
             const { error: insertError } = await supabaseClient
                 .from('Puzzle_Labyrinth')
-                .insert([{
-                    designer_id: currentUserId,
-                    puzzle_name: puzzleName,
-                    question: question,
-                    answer: answer,
-                    google_timer: timer,
-                    max_reward: points,
-                    chicken_penalty: chicken,
-                    wrong_penalty: penalty,
-                    hint_1: hint1 || null,
-                    hint_2: hint2 || null,
-                    reveal_answer: revealAnswer,
-                    likes: 0
-                }]);
+                .insert([
+                    {
+                        designer_id: currentUserId,
+                        puzzle_name: puzzleName,
+                        question: question,
+                        answer: answer,
+                        google_timer: timer,
+                        max_reward: points,
+                        chicken_penalty: chicken,
+                        wrong_penalty: penalty,
+                        hint_1: hint1 || null,
+                        hint_2: hint2 || null,
+                        reveal_answer: revealAnswer,
+                        likes: 0,
+                        room_id: selectedRoomId,
+                        wall_side: selectedWall,
+                        pos_x: currentRoomCoord.x,
+                        pos_y: currentRoomCoord.y
+                    },
+                    {
+                        designer_id: currentUserId,
+                        puzzle_name: puzzleName + ' (Target)',
+                        question: question,
+                        answer: answer,
+                        google_timer: timer,
+                        max_reward: points,
+                        chicken_penalty: chicken,
+                        wrong_penalty: penalty,
+                        hint_1: hint1 || null,
+                        hint_2: hint2 || null,
+                        reveal_answer: revealAnswer,
+                        likes: 0,
+                        room_id: targetRoomId,
+                        wall_side: oppositeWall,
+                        pos_x: targetX,
+                        pos_y: targetY
+                    }
+                ]);
 
             if (insertError) {
                 msgBox.style.color = "var(--accent)";
                 msgBox.textContent = "Fout bij publiceren: " + insertError.message;
             } else {
                 msgBox.style.color = "var(--success)";
-                msgBox.textContent = "🚀 Puzzel succesvol gepubliceerd in de Dungeon!";
-                // Formulier legen
+                msgBox.textContent = `🚀 Puzzel succesvol geplaatst tussen Kamer ${selectedRoomId} en ${targetRoomId}!`;
                 document.getElementById('puzzle-form').reset();
-                // Herlaad de overzichtstabel
                 loadDesignerPuzzles(currentUserId);
             }
         });
