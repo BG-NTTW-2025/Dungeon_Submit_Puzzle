@@ -154,6 +154,20 @@
                         </div>
                     </div>
 
+                    <!-- EXTRA SCHERM: USERNAME OPGEVEN VOOR GOOGLE GEBRUIKERS -->
+                    <div id="google-username-view" style="display:none;">
+                        <p style="margin-bottom: 15px; font-weight:bold; color: var(--accent);">Kies je Ontwerpersnaam</p>
+                        <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 15px;">Je bent ingelogd via Google! Kies nog even een unieke heldennaam voor je profiel:</p>
+                        
+                        <div class="form-group">
+                            <label>Ontwerpersnaam (Username)*</label>
+                            <input type="text" id="google-reg-username" placeholder="Bv. GoogleMaster99">
+                        </div>
+                        <p id="auth-message-google" style="color: var(--warning); font-size: 0.9rem; margin-bottom: 10px;"></p>
+                        
+                        <button class="btn" id="btn-save-google-username" style="width: 100%; background-color: var(--success);">Opslaan & Naar Dashboard</button>
+                    </div>
+
                     <!-- PROFIEL (Ingelogd) -->
                     <div id="profile-section" style="display:none;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -369,45 +383,52 @@
         function toggleAuthView(view) {
             document.getElementById('auth-message-login').textContent = '';
             document.getElementById('auth-message-reg').textContent = '';
+            document.getElementById('login-form-view').style.display = 'none';
+            document.getElementById('register-form-view').style.display = 'none';
+            document.getElementById('google-username-view').style.display = 'none';
+
             if (view === 'register') {
-                document.getElementById('login-form-view').style.display = 'none';
                 document.getElementById('register-form-view').style.display = 'block';
+            } else if (view === 'google-username') {
+                document.getElementById('google-username-view').style.display = 'block';
             } else {
                 document.getElementById('login-form-view').style.display = 'block';
-                document.getElementById('register-form-view').style.display = 'none';
             }
         }
 
-        // Status Beheer & User ID + Username ophalen uit designers tabel
+        // Status Beheer & Controleer of Google-gebruiker al een username heeft
         async function updateUI(session) {
             if (session && session.user) {
-                document.getElementById('login-form-view').style.display = 'none';
-                document.getElementById('register-form-view').style.display = 'none';
-                document.getElementById('profile-section').style.display = 'block';
-                
-                document.getElementById('display-user-id').textContent = session.user.id; // Toont unieke UID
-                
-                // Haal de echte gekozen username op uit de designers-tabel op basis van het User ID
+                // Controleer of deze gebruiker al in de designers-tabel staat
                 const { data: designerData, error } = await supabaseClient
                     .from('designers')
                     .select('username')
                     .eq('id', session.user.id)
                     .single();
 
-                if (designerData && designerData.username) {
-                    document.getElementById('display-username').textContent = designerData.username;
-                } else {
-                    document.getElementById('display-username').textContent = session.user.email.split('@')[0];
+                if (!designerData || !designerData.username) {
+                    // Nog geen username bekend (bijv. net ingelogd via Google)! Vraag erom.
+                    document.getElementById('login-form-view').style.display = 'none';
+                    document.getElementById('register-form-view').style.display = 'none';
+                    document.getElementById('profile-section').style.display = 'none';
+                    document.getElementById('google-username-view').style.display = 'block';
+                    return;
                 }
+
+                // Wel bekend, toon het normale profiel-dashboard
+                document.getElementById('login-form-view').style.display = 'none';
+                document.getElementById('register-form-view').style.display = 'none';
+                document.getElementById('google-username-view').style.display = 'none';
+                document.getElementById('profile-section').style.display = 'block';
+                
+                document.getElementById('display-user-id').textContent = session.user.id;
+                document.getElementById('display-username').textContent = designerData.username;
                 
                 document.getElementById('nav-create').style.display = 'flex'; 
                 document.getElementById('nav-stats').style.display = 'flex'; 
                 document.getElementById('nav-economy').style.display = 'flex';
             } else {
-                document.getElementById('login-form-view').style.display = 'block'; 
-                document.getElementById('register-form-view').style.display = 'none';
-                document.getElementById('profile-section').style.display = 'none';
-                
+                toggleAuthView('login');
                 document.getElementById('display-user-id').textContent = '';
                 document.getElementById('display-username').textContent = 'Ontwerper';
 
@@ -426,7 +447,7 @@
 
         supabaseClient.auth.onAuthStateChange((event, session) => { updateUI(session); });
 
-        // REGISTREREN (Verplichte Username + Koppeling naar designers zonder e-mail)
+        // REGISTREREN VIA EMAIL
         document.getElementById('btn-register-submit').addEventListener('click', async () => {
             const msgBox = document.getElementById('auth-message-reg');
             msgBox.textContent = "Laden...";
@@ -441,26 +462,50 @@
                 return; 
             }
 
-            // 1. Maak de gebruiker aan in Supabase Auth
             const { data, error } = await supabaseClient.auth.signUp({ email: email, password: password });
             
             if (error) { 
                 msgBox.textContent = "Fout: " + error.message; 
             } else { 
                 if(data.user) {
-                    // 2. Sla direct de gekoppelde username en het unieke User ID op in de designers-tabel (zonder e-mail)
                     const { error: dbError } = await supabaseClient.from('designers').insert([
                         { id: data.user.id, username: username }
                     ]);
                     
                     if(dbError) {
-                        console.error("Kon username niet in database opslaan:", dbError);
-                        msgBox.textContent = "Let op account is gemaakt, maar opslaan profiel gaf een fout: " + dbError.message;
+                        console.error("Kon username niet opslaan (RLS checken in Supabase!):", dbError);
+                        msgBox.textContent = "Account gemaakt, maar profiel opslaan mislukte: " + dbError.message;
                         return;
                     }
                 }
                 msgBox.style.color = "var(--success)"; 
-                msgBox.textContent = "Registratie succesvol! Je bent direct ingelogd."; 
+                msgBox.textContent = "Registratie succesvol! Controleer je e-mail voor de bevestiging."; 
+            }
+        });
+
+        // GOOGLE-GEBRUIKERSNAAM OPSLAAN (Voor nieuwe Google-accounts)
+        document.getElementById('btn-save-google-username').addEventListener('click', async () => {
+            const msgBox = document.getElementById('auth-message-google');
+            const username = document.getElementById('google-reg-username').value.trim();
+
+            if (!username) {
+                msgBox.textContent = "Vul een geldige gebruikersnaam in!";
+                return;
+            }
+
+            const { data: sessionData } = await supabaseClient.auth.getSession();
+            if (sessionData && sessionData.session) {
+                const userId = sessionData.session.user.id;
+                
+                const { error: dbError } = await supabaseClient.from('designers').insert([
+                    { id: userId, username: username }
+                ]);
+
+                if (dbError) {
+                    msgBox.textContent = "Fout bij opslaan: " + dbError.message;
+                } else {
+                    updateUI(sessionData.session); // Herlaad scherm naar dashboard
+                }
             }
         });
 
@@ -477,7 +522,7 @@
             if (error) { msgBox.textContent = "Fout bij inloggen: " + error.message; }
         });
 
-        // GOOGLE INLOGGEN (met werkende redirectTo!)
+        // GOOGLE INLOGGEN
         document.getElementById('btn-google').addEventListener('click', async () => {
             const { data, error } = await supabaseClient.auth.signInWithOAuth({ 
                 provider: 'google',
