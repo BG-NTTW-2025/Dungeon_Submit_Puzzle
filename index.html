@@ -187,6 +187,12 @@
                         <br>
                         <button class="btn" id="btn-logout" style="background-color: #ff3333; width: 100%;">Uitloggen</button>
                     </div>
+
+                    <!-- HULP & CONTACT (Altijd zichtbaar onderaan) -->
+                    <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--primary); text-align: center;">
+                        <p style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">Problemen met aanmelden?</p>
+                        <a href="mailto:jaca.eis@gmail.com?subject=Probleem%20Puzzle%20Designer%20Aanmelding" style="font-size: 0.9rem; color: var(--accent); text-decoration: none; font-weight: bold;">📧 Neem contact op met de beheerder</a>
+                    </div>
                 </div>
 
                 <div class="profile-right">
@@ -399,7 +405,6 @@
         // Status Beheer & Controleer of Google-gebruiker al een username heeft
         async function updateUI(session) {
             if (session && session.user) {
-                // Controleer of deze gebruiker al in de designers-tabel staat
                 const { data: designerData, error } = await supabaseClient
                     .from('designers')
                     .select('username')
@@ -407,7 +412,6 @@
                     .single();
 
                 if (!designerData || !designerData.username) {
-                    // Nog geen username bekend (bijv. net ingelogd via Google)! Vraag erom.
                     document.getElementById('login-form-view').style.display = 'none';
                     document.getElementById('register-form-view').style.display = 'none';
                     document.getElementById('profile-section').style.display = 'none';
@@ -415,7 +419,6 @@
                     return;
                 }
 
-                // Wel bekend, toon het normale profiel-dashboard
                 document.getElementById('login-form-view').style.display = 'none';
                 document.getElementById('register-form-view').style.display = 'none';
                 document.getElementById('google-username-view').style.display = 'none';
@@ -447,10 +450,10 @@
 
         supabaseClient.auth.onAuthStateChange((event, session) => { updateUI(session); });
 
-        // REGISTREREN VIA EMAIL
+        // REGISTREREN VIA EMAIL (Eerst check of username al bestaat!)
         document.getElementById('btn-register-submit').addEventListener('click', async () => {
             const msgBox = document.getElementById('auth-message-reg');
-            msgBox.textContent = "Laden...";
+            msgBox.textContent = "Controleren...";
             msgBox.style.color = "var(--warning)";
             
             const username = document.getElementById('reg-username').value.trim();
@@ -462,24 +465,44 @@
                 return; 
             }
 
-            const { data, error } = await supabaseClient.auth.signUp({ email: email, password: password });
+            // STAP 1: Controleer of de username al bezet is IN DE DATABASE
+            const { data: existingUser, error: checkError } = await supabaseClient
+                .from('designers')
+                .select('username')
+                .eq('username', username)
+                .maybeSingle();
+
+            if (existingUser) {
+                msgBox.textContent = `Fout: De ontwerpersnaam "${username}" is al in gebruik. Kies een andere naam.`;
+                return;
+            }
+
+            // STAP 2: Maak pas de gebruiker aan in Supabase Auth met email redirect naar juiste URL
+            const { data, error } = await supabaseClient.auth.signUp({ 
+                email: email, 
+                password: password,
+                options: {
+                    emailRedirectTo: 'https://bg-nttw-2025.github.io/Dungeon_Submit_Puzzle/'
+                }
+            });
             
             if (error) { 
                 msgBox.textContent = "Fout: " + error.message; 
             } else { 
                 if(data.user) {
+                    // STAP 3: Sla het profiel op
                     const { error: dbError } = await supabaseClient.from('designers').insert([
                         { id: data.user.id, username: username }
                     ]);
                     
                     if(dbError) {
-                        console.error("Kon username niet opslaan (RLS checken in Supabase!):", dbError);
-                        msgBox.textContent = "Account gemaakt, maar profiel opslaan mislukte: " + dbError.message;
+                        console.error("Profiel opslaan mislukte:", dbError);
+                        msgBox.textContent = "Fout bij opslaan profiel: " + dbError.message;
                         return;
                     }
                 }
                 msgBox.style.color = "var(--success)"; 
-                msgBox.textContent = "Registratie succesvol! Controleer je e-mail voor de bevestiging."; 
+                msgBox.textContent = "Registratie succesvol! Controleer je e-mail om de registratie te bevestigen. Check ook je spam folder"; 
             }
         });
 
@@ -490,6 +513,18 @@
 
             if (!username) {
                 msgBox.textContent = "Vul een geldige gebruikersnaam in!";
+                return;
+            }
+
+            // Controleer of deze naam al bestaat
+            const { data: existingUser } = await supabaseClient
+                .from('designers')
+                .select('username')
+                .eq('username', username)
+                .maybeSingle();
+
+            if (existingUser) {
+                msgBox.textContent = `De naam "${username}" is al in gebruik!`;
                 return;
             }
 
@@ -504,7 +539,7 @@
                 if (dbError) {
                     msgBox.textContent = "Fout bij opslaan: " + dbError.message;
                 } else {
-                    updateUI(sessionData.session); // Herlaad scherm naar dashboard
+                    updateUI(sessionData.session);
                 }
             }
         });
