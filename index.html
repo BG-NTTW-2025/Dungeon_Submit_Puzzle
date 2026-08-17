@@ -15,6 +15,7 @@
             --text-light: #e0e0e0;
             --success: #4caf50;
             --warning: #ff9800;
+            --danger: #ff3333;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -224,8 +225,9 @@
 
         <!-- TAB 2: Puzzel Maken & Publiceren -->
         <div id="tab-create" class="tab-panel">
-            <h3>Nieuwe Puzzel / Kamer Ontwerpen</h3>
+            <h3 id="form-title">Nieuwe Puzzel / Kamer Ontwerpen</h3>
             <form id="puzzle-form">
+                <input type="hidden" id="edit-puzzle-id" value="">
                 
                 <div class="form-group">
                     <label>Naam Puzzel (voor eigen administratie)</label>
@@ -236,11 +238,11 @@
 
                 <div class="form-group">
                     <label>Vraag / Raadsel</label>
-                    <textarea rows="4" placeholder="Typ hier het raadsel... (Tip: voor meerkeuze, schrijf de keuzes in de tekst, bv. A) ..., B) ...)" id="draft-question"></textarea>
+                    <textarea rows="4" placeholder="Typ hier het raadsel..." id="draft-question"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label>Correcte Antwoord (Tip: gebruik bij meerkeuze de letter A, B of C)</label>
+                    <label>Correcte Antwoord</label>
                     <input type="text" id="draft-answer" placeholder="Vul hier het juiste antwoord in">
                 </div>
 
@@ -272,12 +274,10 @@
                 <!-- Hints -->
                 <div style="background: var(--bg-panel); padding: 15px; border-radius: 4px; margin-top: 15px; border-left: 4px solid #4285F4;">
                     <h5 style="margin-bottom: 10px; font-size: 1rem; color: #4285F4;">💡 Hints voor de Speler (Optioneel)</h5>
-                    
                     <div class="form-group">
                         <label>Hint 1 (Getoond bij 1e foute gok)</label>
                         <input type="text" id="hint-1" placeholder="Kleine tip...">
                     </div>
-
                     <div class="form-group" style="margin-top: 15px;">
                         <label>Hint 2 (Getoond bij 2e foute gok)</label>
                         <input type="text" id="hint-2" placeholder="Grote tip...">
@@ -298,8 +298,9 @@
 
                 <p id="publish-message" style="color: var(--warning); font-size: 0.9rem; margin-bottom: 10px;"></p>
 
-                <div style="margin-top: 20px; text-align: right;">
-                    <button type="button" class="btn" style="background-color: #555; margin-right: 10px;" onclick="saveDraft()">💾 Lokaal Opslaan</button>
+                <div style="margin-top: 20px; text-align: right; display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn" id="btn-cancel-edit" style="background-color: #555; display: none;" onclick="cancelEditMode()">Annuleren</button>
+                    <button type="button" class="btn" style="background-color: #555;" onclick="saveDraft()">💾 Lokaal Opslaan</button>
                     <button type="button" class="btn" id="btn-publish-puzzle" style="background-color: var(--success);">🚀 Publiceer Puzzel</button>
                 </div>
             </form>
@@ -330,7 +331,7 @@
                     <tr>
                         <th>Puzzelnaam (Admin)</th>
                         <th style="text-align: center;">Likes 👍</th>
-                        <th style="text-align: center;">Actie</th>
+                        <th style="text-align: center;">Acties</th>
                     </tr>
                 </thead>
                 <tbody id="designer-puzzles-table">
@@ -349,6 +350,7 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUserId = null;
+        let allDesignerPuzzles = []; // Sla de puzzels lokaal op voor makkelijk editen
 
         function toggleAuthView(view) {
             document.getElementById('auth-message-login').textContent = '';
@@ -442,6 +444,7 @@
             const likesElem = document.getElementById('stat-total-likes');
 
             if (puzzles && puzzles.length > 0) {
+                allDesignerPuzzles = puzzles; // Opslaan voor edit lookup
                 countElem.textContent = puzzles.length;
                 let totalLikes = 0;
                 tableBody.innerHTML = '';
@@ -450,14 +453,18 @@
                     totalLikes += (p.likes || 0);
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${p.puzzle_name || 'New Puzzle'}</td>
+                        <td>${p.puzzle_name || 'New Puzzle'} (Kamer ${p.room_id})</td>
                         <td style="text-align: center; color: var(--success); font-weight: bold;">${p.likes || 0} 👍</td>
-                        <td style="text-align: center;"><button class="btn" style="padding: 5px 10px; margin: 0;">Edit</button></td>
+                        <td style="text-align: center;">
+                            <button class="btn" style="padding: 5px 10px; margin: 0 5px 0 0; background-color: var(--primary);" onclick="prepareEditPuzzle('${p.id}')">Edit</button>
+                            <button class="btn" style="padding: 5px 10px; margin: 0; background-color: var(--danger);" onclick="deletePuzzle('${p.id}')">Delete</button>
+                        </td>
                     `;
                     tableBody.appendChild(row);
                 });
                 likesElem.textContent = totalLikes;
             } else {
+                allDesignerPuzzles = [];
                 countElem.textContent = '0';
                 likesElem.textContent = '0';
                 tableBody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #888;">Nog geen puzzels gevonden. Maak er een aan bij 'Nieuwe Puzzel'!</td></tr>`;
@@ -476,6 +483,58 @@
         checkSession();
 
         supabaseClient.auth.onAuthStateChange((event, session) => { updateUI(session); });
+
+        // FUNCTIE OM PUZZEL TE BEWERKEN (Laden in formulier)
+        function prepareEditPuzzle(puzzleId) {
+            const puzzle = allDesignerPuzzles.find(p => p.id == puzzleId);
+            if (!puzzle) return;
+
+            document.getElementById('edit-puzzle-id').value = puzzle.id;
+            document.getElementById('puzzle-name').value = puzzle.puzzle_name || '';
+            document.getElementById('draft-question').value = puzzle.question || '';
+            document.getElementById('draft-answer').value = puzzle.answer || '';
+            document.getElementById('puzzle-timer').value = puzzle.google_timer || 15;
+            document.getElementById('puzzle-points').value = puzzle.max_reward || 30;
+            document.getElementById('puzzle-chicken').value = puzzle.chicken_penalty || 50;
+            document.getElementById('puzzle-penalty').value = puzzle.wrong_penalty || 10;
+            document.getElementById('hint-1').value = puzzle.hint_1 || '';
+            document.getElementById('hint-2').value = puzzle.hint_2 || '';
+            document.getElementById('reveal-answer-optie').value = puzzle.reveal_answer || 'free_answer';
+
+            // Pas UI knoppen aan voor edit-modus
+            document.getElementById('form-title').textContent = "Puzzel Bewerken";
+            document.getElementById('btn-publish-puzzle').textContent = "💾 Wijzigingen Opslaan";
+            document.getElementById('btn-cancel-edit').style.display = 'inline-block';
+
+            // Open direct het tabblad
+            openTab('tab-create');
+        }
+
+        function cancelEditMode() {
+            document.getElementById('puzzle-form').reset();
+            document.getElementById('edit-puzzle-id').value = '';
+            document.getElementById('form-title').textContent = "Nieuwe Puzzel / Kamer Ontwerpen";
+            document.getElementById('btn-publish-puzzle').textContent = "🚀 Publiceer Puzzel";
+            document.getElementById('btn-cancel-edit').style.display = 'none';
+            document.getElementById('publish-message').textContent = '';
+        }
+
+        // FUNCTIE OM PUZZEL TE VERWIJDEREN
+        async function deletePuzzle(puzzleId) {
+            if (!confirm("Weet je zeker dat je deze puzzel/kamer wilt verwijderen?")) return;
+
+            const { error } = await supabaseClient
+                .from('Puzzle_Labyrinth')
+                .delete()
+                .eq('id', puzzleId);
+
+            if (error) {
+                alert("Fout bij verwijderen: " + error.message);
+            } else {
+                alert("Puzzel succesvol verwijderd!");
+                loadDesignerPuzzles(currentUserId);
+            }
+        }
 
         // Hulpfuncties voor labyrint coördinaten
         function getOppositeWall(wall) {
@@ -498,17 +557,11 @@
             }
         }
 
-        // PUZZEL PUBLICEREN MET AUTOMATISCHE LABYRINT & COÖRDINATEN LOGICA
+        // PUZZEL PUBLICEREN OF BIJWERKEN
         document.getElementById('btn-publish-puzzle').addEventListener('click', async () => {
             const msgBox = document.getElementById('publish-message');
-            msgBox.textContent = "Labyrint analyseren en puzzel publiceren...";
-            msgBox.style.color = "var(--warning)";
-
-            if (!currentUserId) {
-                msgBox.textContent = "Je bent niet ingelogd!";
-                return;
-            }
-
+            const editId = document.getElementById('edit-puzzle-id').value;
+            
             const puzzleName = document.getElementById('puzzle-name').value.trim() || 'New Puzzle';
             const question = document.getElementById('draft-question').value.trim();
             const answer = document.getElementById('draft-answer').value.trim();
@@ -521,13 +574,56 @@
             const revealAnswer = document.getElementById('reveal-answer-optie').value;
 
             if (!question || !answer) {
+                msgBox.style.color = "var(--accent)";
                 msgBox.textContent = "Vul minimaal de vraag en het correcte antwoord in!";
                 return;
             }
 
+            if (!currentUserId) {
+                msgBox.style.color = "var(--accent)";
+                msgBox.textContent = "Je bent niet ingelogd!";
+                return;
+            }
+
+            // ALS WE IN EDIT MODUS ZITTEN: Update bestaande record
+            if (editId) {
+                msgBox.textContent = "Wijzigingen opslaan...";
+                msgBox.style.color = "var(--warning)";
+
+                const { error: updateError } = await supabaseClient
+                    .from('Puzzle_Labyrinth')
+                    .update({
+                        puzzle_name: puzzleName,
+                        question: question,
+                        answer: answer,
+                        google_timer: timer,
+                        max_reward: points,
+                        chicken_penalty: chicken,
+                        wrong_penalty: penalty,
+                        hint_1: hint1 || null,
+                        hint_2: hint2 || null,
+                        reveal_answer: revealAnswer
+                    })
+                    .eq('id', editId);
+
+                if (updateError) {
+                    msgBox.style.color = "var(--accent)";
+                    msgBox.textContent = "Fout bij bijwerken: " + updateError.message;
+                } else {
+                    msgBox.style.color = "var(--success)";
+                    msgBox.textContent = "✨ Puzzel succesvol bijgewerkt!";
+                    cancelEditMode();
+                    loadDesignerPuzzles(currentUserId);
+                }
+                return;
+            }
+
+            // NIEUWE PUZZEL PUBLICEREN (Met labyrinth coördinaten)
+            msgBox.textContent = "Labyrint analyseren en puzzel publiceren...";
+            msgBox.style.color = "var(--warning)";
+
             const directions = ['north', 'south', 'east', 'west'];
 
-            // 1. Haal alle bestaande puzzels op uit het labyrint
             let { data: existingPuzzles, error: fetchError } = await supabaseClient
                 .from('Puzzle_Labyrinth')
                 .select('room_id, wall_side, pos_x, pos_y');
@@ -540,7 +636,6 @@
 
             let selectedRoomId, selectedWall, currentRoomCoord, targetX, targetY, targetRoomId, oppositeWall;
 
-            // ALS HET LABYRINT LEEG IS: Maak Kamer 1 op (0,0)
             if (!existingPuzzles || existingPuzzles.length === 0) {
                 selectedRoomId = 1;
                 selectedWall = 'south';
@@ -551,7 +646,6 @@
                 targetY = offset.y;
                 targetRoomId = 2;
             } else {
-                // Zoek een bestaande kamer met een vrije muur
                 let roomIds = [...new Set(existingPuzzles.map(p => p.room_id))];
                 let attempts = 0;
 
@@ -593,7 +687,6 @@
                 }
             }
 
-            // 2. Sla de dubbele deur-verbinding op in Supabase
             const { error: insertError } = await supabaseClient
                 .from('Puzzle_Labyrinth')
                 .insert([
