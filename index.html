@@ -249,31 +249,30 @@
                     <div id="sCount" class="char-count">0 / 100</div>
                 </div>
 
-                <hr style="border-color: var(--primary); margin: 30px 0;">
-                <h4 style="margin-bottom: 15px; color: #aaa;">Regels, Straffen & Hints</h4>
+<hr style="border-color: var(--primary); margin: 30px 0;">
+<h4 style="margin-bottom: 15px; color: #aaa;">Regels, Straffen & Hints</h4>
 
-                <div class="flex-row">
-                    <div class="form-group">
-                        <label>⏱️ Anti-Google Timer (sec)</label>
-                        <input type="number" id="puzzle-timer" value="15" placeholder="Bv. 15">
-                    </div>
-                    <div class="form-group">
-                        <label>🏆 Max Punten</label>
-                        <input type="number" id="puzzle-points" value="30" placeholder="Bv. 30">
-                    </div>
-                </div>
+<div class="flex-row">
+    <div class="form-group">
+        <label>⏱️ Anti-Google Timer (sec, 0 = uit)</label>
+        <input type="number" id="puzzle-timer" min="0" value="0" placeholder="Bv. 15">
+    </div>
+    <div class="form-group">
+        <label>🏆 Max Punten</label>
+        <input type="number" id="puzzle-points" min="1" value="30" placeholder="Bv. 30">
+    </div>
+</div>
 
-                <div class="flex-row">
-                    <div class="form-group">
-                        <label>🐔 Chicken Penalty (Vlucht-boete)</label>
-                        <input type="number" id="puzzle-chicken" value="50" placeholder="Bv. 50">
-                    </div>
-                    <div class="form-group">
-                        <label>❌ Straf per fout antwoord</label>
-                        <input type="number" id="puzzle-penalty" value="10" placeholder="Bv. 10">
-                    </div>
-                </div>
-
+<div class="flex-row">
+    <div class="form-group">
+        <label>🐔 Chicken Penalty (0 = uit)</label>
+        <input type="number" id="puzzle-chicken" min="0" value="0" placeholder="Bv. 50">
+    </div>
+    <div class="form-group">
+        <label>❌ Straf per fout antwoord</label>
+        <input type="number" id="puzzle-penalty" min="0" value="10" placeholder="Bv. 10">
+    </div>
+</div>
                 <div style="background: var(--bg-panel); padding: 15px; border-radius: 4px; margin-top: 15px; border-left: 4px solid #4285F4;">
                     <h5 style="margin-bottom: 10px; font-size: 1rem; color: #4285F4;">💡 Hints voor de Speler (Optioneel)</h5>
                     <div class="form-group">
@@ -589,10 +588,10 @@
             const puzzleName = document.getElementById('puzzle-name').value.trim() || 'New Puzzle';
             const question = document.getElementById('draft-question').value.trim();
             const answer = document.getElementById('draft-answer').value.trim();
-            const timer = parseInt(document.getElementById('puzzle-timer').value) || 15;
-            const points = parseInt(document.getElementById('puzzle-points').value) || 30;
-            const chicken = parseInt(document.getElementById('puzzle-chicken').value) || 50;
-            const penalty = parseInt(document.getElementById('puzzle-penalty').value) || 10;
+const timer = Math.max(0, parseInt(document.getElementById('puzzle-timer').value) || 0);
+const points = Math.max(1, parseInt(document.getElementById('puzzle-points').value) || 30);
+const chicken = Math.max(0, parseInt(document.getElementById('puzzle-chicken').value) || 0);
+const penalty = Math.max(0, parseInt(document.getElementById('puzzle-penalty').value) || 10);
             const hint1 = document.getElementById('hint-1').value.trim();
             const hint2 = document.getElementById('hint-2').value.trim();
             const revealAnswer = document.getElementById('reveal-answer-optie').value;
