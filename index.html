@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Puzzle Designer - Dashboard</title>
     <!-- SUPABASE JS BIBLIOTHEEK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -70,6 +70,8 @@
             width: 100%; padding: 12px; border-radius: 4px; border: 1px solid var(--primary); background-color: var(--bg-dark); color: var(--text-light); font-size: 1rem;
         }
 
+        .char-count { font-size: 0.8rem; color: #888; text-align: right; margin-top: 4px; }
+
         .flex-row { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
         .flex-row > div { flex: 1; min-width: 200px; }
 
@@ -93,6 +95,14 @@
         table { width: 100%; border-collapse: collapse; margin-top: 20px; background-color: var(--bg-dark); border-radius: 6px; overflow: hidden; }
         th { padding: 15px; text-align: left; background-color: var(--primary); }
         td { padding: 15px; border-bottom: 1px solid var(--primary); }
+
+        @media(max-width: 768px) {
+            html, body { flex-direction: column; overflow: auto; }
+            .sidebar { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 10px; }
+            .sidebar h2 { display: none; }
+            .tab-button { padding: 10px 15px; font-size: 0.9rem; }
+            .main-content { padding: 15px; }
+        }
     </style>
 </head>
 <body>
@@ -112,7 +122,6 @@
             <div class="profile-layout">
                 
                 <div class="profile-left">
-                    <!-- INLOGGEN / REGISTREREN (Niet ingelogd) -->
                     <div id="login-form-view">
                         <p style="margin-bottom: 15px;">Log in op je ontwerpersaccount:</p>
                         <button class="btn" id="btn-google" style="background-color: #4285F4; width: 100%; margin-bottom: 20px;">Inloggen met Google</button>
@@ -132,7 +141,6 @@
                         </div>
                     </div>
 
-                    <!-- REGISTREREN SCHERM -->
                     <div id="register-form-view" style="display:none;">
                         <p style="margin-bottom: 15px; font-weight:bold; color: var(--accent);">Nieuw Ontwerpersaccount</p>
                         
@@ -158,7 +166,6 @@
                         </div>
                     </div>
 
-                    <!-- EXTRA SCHERM: USERNAME OPGEVEN VOOR GOOGLE GEBRUIKERS -->
                     <div id="google-username-view" style="display:none;">
                         <p style="margin-bottom: 15px; font-weight:bold; color: var(--accent);">Kies je Ontwerpersnaam</p>
                         <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 15px;">Je bent ingelogd via Google! Kies nog even een unieke heldennaam voor je profiel:</p>
@@ -172,7 +179,6 @@
                         <button class="btn" id="btn-save-google-username" style="width: 100%; background-color: var(--success);">Opslaan & Naar Dashboard</button>
                     </div>
 
-                    <!-- PROFIEL (Ingelogd) -->
                     <div id="profile-section" style="display:none;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                             <p style="font-size: 1.2rem; margin: 0;">Welkom terug, <strong id="display-username" style="color: var(--accent);">Ontwerper</strong>!</p>
@@ -182,7 +188,6 @@
                         <p style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">Jouw unieke Systeem User ID:</p>
                         <p id="display-user-id" style="font-size: 0.8rem; color: var(--success); background: var(--bg-dark); padding: 8px; border-radius: 4px; word-break: break-all; margin-bottom: 15px; border: 1px solid var(--primary);"></p>
 
-                        <!-- AVATAR URL INVOEREN -->
                         <div class="form-group" style="margin-top: 15px;">
                             <label style="font-size: 0.9rem;">Avatar Afbeeldings-URL</label>
                             <div style="display: flex; gap: 10px;">
@@ -202,7 +207,6 @@
                         <button class="btn" id="btn-logout" style="background-color: #ff3333; width: 100%;">Uitloggen</button>
                     </div>
 
-                    <!-- HULP & CONTACT -->
                     <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--primary); text-align: center;">
                         <p style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">Problemen met aanmelden?</p>
                         <a href="mailto:jaca.eis@gmail.com?subject=Probleem%20Puzzle%20Designer%20Aanmelding" style="font-size: 0.9rem; color: var(--accent); text-decoration: none; font-weight: bold;">📧 Neem contact op met de beheerder</a>
@@ -227,10 +231,10 @@
         <div id="tab-create" class="tab-panel">
             <h3 id="form-title">Nieuwe Puzzel / Kamer Ontwerpen</h3>
             <form id="puzzle-form">
-                <input type="hidden" id="edit-puzzle-id" value="">
+                <input type="hidden" id="edit-puzzle-name" value="">
                 
                 <div class="form-group">
-                    <label>Naam Puzzel (voor eigen administratie)</label>
+                    <label>Naam Puzzel (unieke identificatie)</label>
                     <input type="text" id="puzzle-name" placeholder="Bv. 'Logica Raadsel 1'">
                 </div>
 
@@ -238,12 +242,14 @@
 
                 <div class="form-group">
                     <label>Vraag / Raadsel</label>
-                    <textarea rows="4" placeholder="Typ hier het raadsel..." id="draft-question"></textarea>
+                    <textarea rows="4" maxlength="300" placeholder="Typ hier het raadsel..." id="draft-question"></textarea>
+                    <div id="qCount" class="char-count">0 / 300</div>
                 </div>
 
                 <div class="form-group">
                     <label>Correcte Antwoord</label>
-                    <input type="text" id="draft-answer" placeholder="Vul hier het juiste antwoord in">
+                    <input type="text" id="draft-answer" maxlength="100" placeholder="Vul hier het juiste antwoord in">
+                    <div id="sCount" class="char-count">0 / 100</div>
                 </div>
 
                 <hr style="border-color: var(--primary); margin: 30px 0;">
@@ -271,7 +277,6 @@
                     </div>
                 </div>
 
-                <!-- Hints -->
                 <div style="background: var(--bg-panel); padding: 15px; border-radius: 4px; margin-top: 15px; border-left: 4px solid #4285F4;">
                     <h5 style="margin-bottom: 10px; font-size: 1rem; color: #4285F4;">💡 Hints voor de Speler (Optioneel)</h5>
                     <div class="form-group">
@@ -306,14 +311,14 @@
             </form>
         </div>
 
-        <!-- TAB 3: Mijn Creaties -->
+        <!-- TAB 3: Mijn Creaties (Unieke Puzzels zonder Kamernummers) -->
         <div id="tab-stats" class="tab-panel">
             <h3>Mijn Administratie & Creaties</h3>
-            <p style="margin-bottom: 20px; color: #aaa;">Beheer hier al je kamers, scores en actieve ontwerpers-credits.</p>
+            <p style="margin-bottom: 20px; color: #aaa;">Beheer hier al je unieke puzzels, likes en actieve ontwerpers-credits.</p>
             
             <div class="stats-grid">
                 <div class="stat-card" style="border-color: #4285F4;">
-                    <h4>Actieve Puzzels</h4>
+                    <h4>Unieke Puzzels</h4>
                     <p id="stat-total-puzzles">0</p>
                 </div>
                 <div class="stat-card" style="border-color: gold;">
@@ -329,7 +334,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Puzzelnaam (Admin)</th>
+                        <th>Puzzelnaam</th>
                         <th style="text-align: center;">Likes 👍</th>
                         <th style="text-align: center;">Acties</th>
                     </tr>
@@ -350,7 +355,16 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUserId = null;
-        let allDesignerPuzzles = []; // Sla de puzzels lokaal op voor makkelijk editen
+        let uniqueDesignerPuzzles = [];
+
+        // Karaktertellers
+        const qInput = document.getElementById('draft-question');
+        const sInput = document.getElementById('draft-answer');
+        const qCount = document.getElementById('qCount');
+        const sCount = document.getElementById('sCount');
+
+        qInput.addEventListener('input', () => { qCount.textContent = `${qInput.value.length} / 300`; });
+        sInput.addEventListener('input', () => { sCount.textContent = `${sInput.value.length} / 100`; });
 
         function toggleAuthView(view) {
             document.getElementById('auth-message-login').textContent = '';
@@ -433,6 +447,7 @@
             }
         }
 
+        // Unieke puzzels laden (zonder dubbele target regels)
         async function loadDesignerPuzzles(designerId) {
             const { data: puzzles, error } = await supabaseClient
                 .from('Puzzle_Labyrinth')
@@ -444,27 +459,40 @@
             const likesElem = document.getElementById('stat-total-likes');
 
             if (puzzles && puzzles.length > 0) {
-                allDesignerPuzzles = puzzles; // Opslaan voor edit lookup
-                countElem.textContent = puzzles.length;
+                // Filter unieke puzzelnamen eruit (zonder ' (Target)')
+                const uniqueMap = new Map();
+                puzzles.forEach(p => {
+                    let cleanName = (p.puzzle_name || 'New Puzzle').replace(' (Target)', '');
+                    if (!uniqueMap.has(cleanName)) {
+                        uniqueMap.set(cleanName, { ...p, puzzle_name: cleanName, likes: p.likes || 0 });
+                    } else {
+                        // Tel likes bij elkaar op als ze over de 2 deuren verdeeld zijn
+                        let existing = uniqueMap.get(cleanName);
+                        existing.likes += (p.likes || 0);
+                    }
+                });
+
+                uniqueDesignerPuzzles = Array.from(uniqueMap.values());
+                countElem.textContent = uniqueDesignerPuzzles.length;
                 let totalLikes = 0;
                 tableBody.innerHTML = '';
 
-                puzzles.forEach(p => {
-                    totalLikes += (p.likes || 0);
+                uniqueDesignerPuzzles.forEach(p => {
+                    totalLikes += p.likes;
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${p.puzzle_name || 'New Puzzle'} (Kamer ${p.room_id})</td>
-                        <td style="text-align: center; color: var(--success); font-weight: bold;">${p.likes || 0} 👍</td>
+                        <td>${escapeHtml(p.puzzle_name)}</td>
+                        <td style="text-align: center; color: var(--success); font-weight: bold;">${p.likes} 👍</td>
                         <td style="text-align: center;">
-                            <button class="btn" style="padding: 5px 10px; margin: 0 5px 0 0; background-color: var(--primary);" onclick="prepareEditPuzzle('${p.id}')">Edit</button>
-                            <button class="btn" style="padding: 5px 10px; margin: 0; background-color: var(--danger);" onclick="deletePuzzle('${p.id}')">Delete</button>
+                            <button class="btn" style="padding: 5px 10px; margin: 0 5px 0 0; background-color: var(--primary);" onclick="prepareEditPuzzle('${escapeHtml(p.puzzle_name)}')">Edit</button>
+                            <button class="btn" style="padding: 5px 10px; margin: 0; background-color: var(--danger);" onclick="deletePuzzleByName('${escapeHtml(p.puzzle_name)}')">Delete</button>
                         </td>
                     `;
                     tableBody.appendChild(row);
                 });
                 likesElem.textContent = totalLikes;
             } else {
-                allDesignerPuzzles = [];
+                uniqueDesignerPuzzles = [];
                 countElem.textContent = '0';
                 likesElem.textContent = '0';
                 tableBody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #888;">Nog geen puzzels gevonden. Maak er een aan bij 'Nieuwe Puzzel'!</td></tr>`;
@@ -484,13 +512,13 @@
 
         supabaseClient.auth.onAuthStateChange((event, session) => { updateUI(session); });
 
-        // FUNCTIE OM PUZZEL TE BEWERKEN (Laden in formulier)
-        function prepareEditPuzzle(puzzleId) {
-            const puzzle = allDesignerPuzzles.find(p => p.id == puzzleId);
+        // BEWERKEN OP NAAM (Update beide deur-records tegelijk)
+        function prepareEditPuzzle(puzzleName) {
+            const puzzle = uniqueDesignerPuzzles.find(p => p.puzzle_name === puzzleName);
             if (!puzzle) return;
 
-            document.getElementById('edit-puzzle-id').value = puzzle.id;
-            document.getElementById('puzzle-name').value = puzzle.puzzle_name || '';
+            document.getElementById('edit-puzzle-name').value = puzzle.puzzle_name;
+            document.getElementById('puzzle-name').value = puzzle.puzzle_name;
             document.getElementById('draft-question').value = puzzle.question || '';
             document.getElementById('draft-answer').value = puzzle.answer || '';
             document.getElementById('puzzle-timer').value = puzzle.google_timer || 15;
@@ -501,42 +529,48 @@
             document.getElementById('hint-2').value = puzzle.hint_2 || '';
             document.getElementById('reveal-answer-optie').value = puzzle.reveal_answer || 'free_answer';
 
-            // Pas UI knoppen aan voor edit-modus
+            qCount.textContent = `${(puzzle.question || '').length} / 300`;
+            sCount.textContent = `${(puzzle.answer || '').length} / 100`;
+
             document.getElementById('form-title').textContent = "Puzzel Bewerken";
             document.getElementById('btn-publish-puzzle').textContent = "💾 Wijzigingen Opslaan";
             document.getElementById('btn-cancel-edit').style.display = 'inline-block';
 
-            // Open direct het tabblad
             openTab('tab-create');
         }
 
         function cancelEditMode() {
             document.getElementById('puzzle-form').reset();
-            document.getElementById('edit-puzzle-id').value = '';
+            document.getElementById('edit-puzzle-name').value = '';
             document.getElementById('form-title').textContent = "Nieuwe Puzzel / Kamer Ontwerpen";
             document.getElementById('btn-publish-puzzle').textContent = "🚀 Publiceer Puzzel";
             document.getElementById('btn-cancel-edit').style.display = 'none';
             document.getElementById('publish-message').textContent = '';
+            qCount.textContent = "0 / 300";
+            sCount.textContent = "0 / 100";
+            
+            // Keert netjes terug naar Mijn Creaties!
+            openTab('tab-stats');
         }
 
-        // FUNCTIE OM PUZZEL TE VERWIJDEREN
-        async function deletePuzzle(puzzleId) {
-            if (!confirm("Weet je zeker dat je deze puzzel/kamer wilt verwijderen?")) return;
+        // VERWIJDEREN OP NAAM (Verwijdert beide deuren: origineel én target)
+        async function deletePuzzleByName(puzzleName) {
+            if (!confirm(`Weet je zeker dat je puzzel "${puzzleName}" (beide deuren) wilt verwijderen?`)) return;
 
             const { error } = await supabaseClient
                 .from('Puzzle_Labyrinth')
                 .delete()
-                .eq('id', puzzleId);
+                .eq('designer_id', currentUserId)
+                .or(`puzzle_name.eq.${puzzleName},puzzle_name.eq.${puzzleName} (Target)`);
 
             if (error) {
                 alert("Fout bij verwijderen: " + error.message);
             } else {
-                alert("Puzzel succesvol verwijderd!");
+                alert("Puzzel succesvol verwijderd uit het labyrint!");
                 loadDesignerPuzzles(currentUserId);
             }
         }
 
-        // Hulpfuncties voor labyrint coördinaten
         function getOppositeWall(wall) {
             switch (wall) {
                 case 'north': return 'south';
@@ -557,10 +591,10 @@
             }
         }
 
-        // PUZZEL PUBLICEREN OF BIJWERKEN
+        // PUBLICEREN OF BIJWERKEN
         document.getElementById('btn-publish-puzzle').addEventListener('click', async () => {
             const msgBox = document.getElementById('publish-message');
-            const editId = document.getElementById('edit-puzzle-id').value;
+            const editName = document.getElementById('edit-puzzle-name').value;
             
             const puzzleName = document.getElementById('puzzle-name').value.trim() || 'New Puzzle';
             const question = document.getElementById('draft-question').value.trim();
@@ -585,12 +619,13 @@
                 return;
             }
 
-            // ALS WE IN EDIT MODUS ZITTEN: Update bestaande record
-            if (editId) {
+            // BEWERKEN VAN BESTAANDE PUZZEL (Update zowel origineel als target)
+            if (editName) {
                 msgBox.textContent = "Wijzigingen opslaan...";
                 msgBox.style.color = "var(--warning)";
 
-                const { error: updateError } = await supabaseClient
+                // Update originele deur
+                await supabaseClient
                     .from('Puzzle_Labyrinth')
                     .update({
                         puzzle_name: puzzleName,
@@ -604,7 +639,26 @@
                         hint_2: hint2 || null,
                         reveal_answer: revealAnswer
                     })
-                    .eq('id', editId);
+                    .eq('designer_id', currentUserId)
+                    .eq('puzzle_name', editName);
+
+                // Update target deur
+                const { error: updateError } = await supabaseClient
+                    .from('Puzzle_Labyrinth')
+                    .update({
+                        puzzle_name: puzzleName + ' (Target)',
+                        question: question,
+                        answer: answer,
+                        google_timer: timer,
+                        max_reward: points,
+                        chicken_penalty: chicken,
+                        wrong_penalty: penalty,
+                        hint_1: hint1 || null,
+                        hint_2: hint2 || null,
+                        reveal_answer: revealAnswer
+                    })
+                    .eq('designer_id', currentUserId)
+                    .eq('puzzle_name', editName + ' (Target)');
 
                 if (updateError) {
                     msgBox.style.color = "var(--accent)";
@@ -618,7 +672,7 @@
                 return;
             }
 
-            // NIEUWE PUZZEL PUBLICEREN (Met labyrinth coördinaten)
+            // NIEUWE PUZZEL PUBLICEREN
             msgBox.textContent = "Labyrint analyseren en puzzel publiceren...";
             msgBox.style.color = "var(--warning)";
 
@@ -735,11 +789,12 @@
                 msgBox.style.color = "var(--success)";
                 msgBox.textContent = `🚀 Puzzel succesvol geplaatst tussen Kamer ${selectedRoomId} en ${targetRoomId}!`;
                 document.getElementById('puzzle-form').reset();
+                qCount.textContent = "0 / 300";
+                sCount.textContent = "0 / 100";
                 loadDesignerPuzzles(currentUserId);
             }
         });
 
-        // AVATAR URL OPSLAAN
         document.getElementById('btn-save-avatar').addEventListener('click', async () => {
             const avatarUrl = document.getElementById('profile-avatar-url').value.trim();
             const msg = document.getElementById('avatar-save-msg');
@@ -763,7 +818,6 @@
             }
         });
 
-        // REGISTREREN VIA EMAIL
         document.getElementById('btn-register-submit').addEventListener('click', async () => {
             const msgBox = document.getElementById('auth-message-reg');
             msgBox.textContent = "Controleren of gebruikersnaam beschikbaar is...";
@@ -810,18 +864,16 @@
                     ]);
                     
                     if(dbError) {
-                        console.error("Profiel opslaan mislukte:", dbError);
                         msgBox.style.color = "var(--accent)";
                         msgBox.textContent = "Fout bij opslaan profiel: " + dbError.message;
                         return;
                     }
                 }
                 msgBox.style.color = "var(--success)"; 
-                msgBox.textContent = "Registratie succesvol! Controleer je e-mail om de registratie te bevestigen. Check ook je spam folder."; 
+                msgBox.textContent = "Registratie succesvol! Controleer je e-mail om de registratie te bevestigen."; 
             }
         });
 
-        // GOOGLE-GEBRUIKERSNAAM OPSLAAN
         document.getElementById('btn-save-google-username').addEventListener('click', async () => {
             const msgBox = document.getElementById('auth-message-google');
             const username = document.getElementById('google-reg-username').value.trim();
@@ -856,7 +908,6 @@
             }
         });
 
-        // INLOGGEN MET EMAIL
         document.getElementById('btn-login').addEventListener('click', async () => {
             const msgBox = document.getElementById('auth-message-login');
             msgBox.textContent = "Inloggen...";
@@ -869,23 +920,19 @@
             if (error) { msgBox.textContent = "Fout bij inloggen: " + error.message; }
         });
 
-        // GOOGLE INLOGGEN
         document.getElementById('btn-google').addEventListener('click', async () => {
-            const { data, error } = await supabaseClient.auth.signInWithOAuth({ 
+            await supabaseClient.auth.signInWithOAuth({ 
                 provider: 'google',
                 options: {
                     redirectTo: 'https://bg-nttw-2025.github.io/Dungeon_Submit_Puzzle/'
                 }
             });
-            if (error) { document.getElementById('auth-message-login').textContent = "Google Login Fout: " + error.message; }
         });
 
-        // UITLOGGEN
         document.getElementById('btn-logout').addEventListener('click', async () => {
             await supabaseClient.auth.signOut();
         });
 
-        // TABBLADEN WISSELEN
         function openTab(tabId) {
             document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
@@ -908,6 +955,10 @@
             const questionText = document.getElementById('draft-question').value;
             localStorage.setItem('draft_puzzle_question', questionText);
             alert('Concept lokaal opgeslagen!');
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
     </script>
 </body>
