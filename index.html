@@ -511,9 +511,9 @@
             document.getElementById('puzzle-name').value = puzzle.puzzle_name;
             document.getElementById('draft-question').value = puzzle.question || '';
             document.getElementById('draft-answer').value = puzzle.answer || '';
-            document.getElementById('puzzle-timer').value = puzzle.google_timer || 15;
+            document.getElementById('puzzle-timer').value = puzzle.google_timer || 0;
             document.getElementById('puzzle-points').value = puzzle.max_reward || 30;
-            document.getElementById('puzzle-chicken').value = puzzle.chicken_penalty || 50;
+            document.getElementById('puzzle-chicken').value = puzzle.chicken_penalty || 0;
             document.getElementById('puzzle-penalty').value = puzzle.wrong_penalty || 10;
             document.getElementById('hint-1').value = puzzle.hint_1 || '';
             document.getElementById('hint-2').value = puzzle.hint_2 || '';
