@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Puzzle Designer - Dashboard</title>
-    <!-- SUPABASE JS BIBLIOTHEEK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -116,7 +115,6 @@
 
     <div class="main-content">
 
-        <!-- TAB 1: Profiel -->
         <div id="tab-profile" class="tab-panel active">
             <h3>Account & Instellingen</h3>
             <div class="profile-layout">
@@ -227,11 +225,10 @@
             </div>
         </div>
 
-        <!-- TAB 2: Puzzel Maken & Publiceren -->
         <div id="tab-create" class="tab-panel">
             <h3 id="form-title">Nieuwe Puzzel / Kamer Ontwerpen</h3>
             <form id="puzzle-form">
-                <input type="hidden" id="edit-puzzle-name" value="">
+                <input type="hidden" id="edit-puzzle-id" value="">
                 
                 <div class="form-group">
                     <label>Naam Puzzel (unieke identificatie)</label>
@@ -311,7 +308,6 @@
             </form>
         </div>
 
-        <!-- TAB 3: Mijn Creaties (Unieke Puzzels zonder Kamernummers) -->
         <div id="tab-stats" class="tab-panel">
             <h3>Mijn Administratie & Creaties</h3>
             <p style="margin-bottom: 20px; color: #aaa;">Beheer hier al je unieke puzzels, likes en actieve ontwerpers-credits.</p>
@@ -357,7 +353,6 @@
         let currentUserId = null;
         let uniqueDesignerPuzzles = [];
 
-        // Karaktertellers
         const qInput = document.getElementById('draft-question');
         const sInput = document.getElementById('draft-answer');
         const qCount = document.getElementById('qCount');
@@ -447,7 +442,6 @@
             }
         }
 
-        // Unieke puzzels laden (zonder dubbele target regels)
         async function loadDesignerPuzzles(designerId) {
             const { data: puzzles, error } = await supabaseClient
                 .from('Puzzle_Labyrinth')
@@ -459,14 +453,12 @@
             const likesElem = document.getElementById('stat-total-likes');
 
             if (puzzles && puzzles.length > 0) {
-                // Filter unieke puzzelnamen eruit (zonder ' (Target)')
                 const uniqueMap = new Map();
                 puzzles.forEach(p => {
                     let cleanName = (p.puzzle_name || 'New Puzzle').replace(' (Target)', '');
                     if (!uniqueMap.has(cleanName)) {
                         uniqueMap.set(cleanName, { ...p, puzzle_name: cleanName, likes: p.likes || 0 });
                     } else {
-                        // Tel likes bij elkaar op als ze over de 2 deuren verdeeld zijn
                         let existing = uniqueMap.get(cleanName);
                         existing.likes += (p.likes || 0);
                     }
@@ -512,12 +504,11 @@
 
         supabaseClient.auth.onAuthStateChange((event, session) => { updateUI(session); });
 
-        // BEWERKEN OP NAAM (Update beide deur-records tegelijk)
         function prepareEditPuzzle(puzzleName) {
             const puzzle = uniqueDesignerPuzzles.find(p => p.puzzle_name === puzzleName);
             if (!puzzle) return;
 
-            document.getElementById('edit-puzzle-name').value = puzzle.puzzle_name;
+            document.getElementById('edit-puzzle-id').value = puzzle.id;
             document.getElementById('puzzle-name').value = puzzle.puzzle_name;
             document.getElementById('draft-question').value = puzzle.question || '';
             document.getElementById('draft-answer').value = puzzle.answer || '';
@@ -541,27 +532,26 @@
 
         function cancelEditMode() {
             document.getElementById('puzzle-form').reset();
-            document.getElementById('edit-puzzle-name').value = '';
+            document.getElementById('edit-puzzle-id').value = '';
             document.getElementById('form-title').textContent = "Nieuwe Puzzel / Kamer Ontwerpen";
             document.getElementById('btn-publish-puzzle').textContent = "🚀 Publiceer Puzzel";
             document.getElementById('btn-cancel-edit').style.display = 'none';
             document.getElementById('publish-message').textContent = '';
             qCount.textContent = "0 / 300";
             sCount.textContent = "0 / 100";
-            
-            // Keert netjes terug naar Mijn Creaties!
             openTab('tab-stats');
         }
 
-        // VERWIJDEREN OP NAAM (Verwijdert beide deuren: origineel én target)
+        // VERWIJDEREN OP BASIS VAN PUZZELNAAM (beide deuren)
         async function deletePuzzleByName(puzzleName) {
             if (!confirm(`Weet je zeker dat je puzzel "${puzzleName}" (beide deuren) wilt verwijderen?`)) return;
 
+            // Verwijder zowel de originele als de (Target) variant uit de database
             const { error } = await supabaseClient
                 .from('Puzzle_Labyrinth')
                 .delete()
                 .eq('designer_id', currentUserId)
-                .or(`puzzle_name.eq.${puzzleName},puzzle_name.eq.${puzzleName} (Target)`);
+                .in('puzzle_name', [puzzleName, puzzleName + ' (Target)']);
 
             if (error) {
                 alert("Fout bij verwijderen: " + error.message);
@@ -594,7 +584,7 @@
         // PUBLICEREN OF BIJWERKEN
         document.getElementById('btn-publish-puzzle').addEventListener('click', async () => {
             const msgBox = document.getElementById('publish-message');
-            const editName = document.getElementById('edit-puzzle-name').value;
+            const editId = document.getElementById('edit-puzzle-id').value;
             
             const puzzleName = document.getElementById('puzzle-name').value.trim() || 'New Puzzle';
             const question = document.getElementById('draft-question').value.trim();
@@ -619,13 +609,17 @@
                 return;
             }
 
-            // BEWERKEN VAN BESTAANDE PUZZEL (Update zowel origineel als target)
-            if (editName) {
+            // BEWERKEN VAN BESTAANDE PUZZEL
+            if (editId) {
                 msgBox.textContent = "Wijzigingen opslaan...";
                 msgBox.style.color = "var(--warning)";
 
-                // Update originele deur
-                await supabaseClient
+                // Haal eerst de oude naam op om ook de target te kunnen updaten
+                const oldPuzzle = uniqueDesignerPuzzles.find(p => p.id == editId);
+                const oldName = oldPuzzle ? oldPuzzle.puzzle_name : puzzleName;
+
+                // Update alle rijen die horen bij deze puzzelnaam voor deze designer
+                const { error: updateError } = await supabaseClient
                     .from('Puzzle_Labyrinth')
                     .update({
                         puzzle_name: puzzleName,
@@ -640,10 +634,10 @@
                         reveal_answer: revealAnswer
                     })
                     .eq('designer_id', currentUserId)
-                    .eq('puzzle_name', editName);
+                    .eq('puzzle_name', oldName);
 
-                // Update target deur
-                const { error: updateError } = await supabaseClient
+                // Update ook de target rijen
+                await supabaseClient
                     .from('Puzzle_Labyrinth')
                     .update({
                         puzzle_name: puzzleName + ' (Target)',
@@ -658,7 +652,7 @@
                         reveal_answer: revealAnswer
                     })
                     .eq('designer_id', currentUserId)
-                    .eq('puzzle_name', editName + ' (Target)');
+                    .eq('puzzle_name', oldName + ' (Target)');
 
                 if (updateError) {
                     msgBox.style.color = "var(--accent)";
