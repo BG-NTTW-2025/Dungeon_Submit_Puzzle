@@ -258,19 +258,19 @@
                         <input type="number" id="puzzle-timer" min="0" max="99" value="0" placeholder="Bv. 0">
                     </div>
                     <div class="form-group">
-                        <label>🏆 Max Punten</label>
-                        <input type="number" id="puzzle-points" min="1" value="30" placeholder="Bv. 30">
+                        <label>🏆 Max Punten (max 99)</label>
+                        <input type="number" id="puzzle-points" min="1" max="99" value="30" placeholder="Bv. 30">
                     </div>
                 </div>
 
                 <div class="flex-row">
                     <div class="form-group">
-                        <label>🐔 Chicken Penalty (0 = uit)</label>
-                        <input type="number" id="puzzle-chicken" min="0" value="0" placeholder="Bv. 0">
+                        <label>🐔 Chicken Penalty (max 99, 0 = uit)</label>
+                        <input type="number" id="puzzle-chicken" min="0" max="99" value="0" placeholder="Bv. 0">
                     </div>
                     <div class="form-group">
-                        <label>❌ Straf per fout antwoord</label>
-                        <input type="number" id="puzzle-penalty" min="0" value="10" placeholder="Bv. 10">
+                        <label>❌ Straf per fout antwoord (max 99)</label>
+                        <input type="number" id="puzzle-penalty" min="0" max="99" value="10" placeholder="Bv. 10">
                     </div>
                 </div>
                 <div style="background: var(--bg-panel); padding: 15px; border-radius: 4px; margin-top: 15px; border-left: 4px solid #4285F4;">
@@ -512,9 +512,9 @@
             document.getElementById('draft-question').value = puzzle.question || '';
             document.getElementById('draft-answer').value = puzzle.answer || '';
             document.getElementById('puzzle-timer').value = Math.min(99, puzzle.google_timer || 0);
-            document.getElementById('puzzle-points').value = puzzle.max_reward || 30;
-            document.getElementById('puzzle-chicken').value = puzzle.chicken_penalty || 0;
-            document.getElementById('puzzle-penalty').value = puzzle.wrong_penalty || 10;
+            document.getElementById('puzzle-points').value = Math.min(99, puzzle.max_reward || 30);
+            document.getElementById('puzzle-chicken').value = Math.min(99, puzzle.chicken_penalty || 0);
+            document.getElementById('puzzle-penalty').value = Math.min(99, puzzle.wrong_penalty || 10);
             document.getElementById('hint-1').value = puzzle.hint_1 || '';
             document.getElementById('hint-2').value = puzzle.hint_2 || '';
             document.getElementById('reveal-answer-optie').value = puzzle.reveal_answer || 'free_answer';
@@ -586,13 +586,19 @@
             const question = document.getElementById('draft-question').value.trim();
             const answer = document.getElementById('draft-answer').value.trim();
             
-            // Streng begrensde timer tot max 99 seconden
+            // Streng begrensde waardes tot max 99
             let timer = parseInt(document.getElementById('puzzle-timer').value) || 0;
             timer = Math.max(0, Math.min(99, timer));
 
-            const points = Math.max(1, parseInt(document.getElementById('puzzle-points').value) || 30);
-            const chicken = Math.max(0, parseInt(document.getElementById('puzzle-chicken').value) || 0);
-            const penalty = Math.max(0, parseInt(document.getElementById('puzzle-penalty').value) || 10);
+            let points = parseInt(document.getElementById('puzzle-points').value) || 30;
+            points = Math.max(1, Math.min(99, points));
+
+            let chicken = parseInt(document.getElementById('puzzle-chicken').value) || 0;
+            chicken = Math.max(0, Math.min(99, chicken));
+
+            let penalty = parseInt(document.getElementById('puzzle-penalty').value) || 10;
+            penalty = Math.max(0, Math.min(99, penalty));
+
             const hint1 = document.getElementById('hint-1').value.trim();
             const hint2 = document.getElementById('hint-2').value.trim();
             const revealAnswer = document.getElementById('reveal-answer-optie').value;
