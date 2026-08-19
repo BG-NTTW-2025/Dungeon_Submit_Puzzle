@@ -109,8 +109,7 @@
     <div class="sidebar">
         <h2>Puzzle Designer</h2>
         <button class="tab-button active" onclick="openTab('tab-profile')">⚙️ Profiel & Login</button>
-				<button class="tab-button" onclick="clickNieuwePuzzelMenu()" id="nav-create" style="display:none;">🧩 Nieuwe Puzzel</button>
-        <button class="tab-button" onclick="openTab('tab-create')" id="nav-create" style="display:none;">🧩 Nieuwe Puzzel</button>
+        <button class="tab-button" onclick="clickNieuwePuzzelMenu()" id="nav-create" style="display:none;">🧩 Nieuwe Puzzel</button>
         <button class="tab-button" onclick="openTab('tab-stats')" id="nav-stats" style="display:none;">📊 Mijn Creaties</button>
     </div>
 
@@ -250,30 +249,30 @@
                     <div id="sCount" class="char-count">0 / 100</div>
                 </div>
 
-<hr style="border-color: var(--primary); margin: 30px 0;">
-<h4 style="margin-bottom: 15px; color: #aaa;">Regels, Straffen & Hints</h4>
+                <hr style="border-color: var(--primary); margin: 30px 0;">
+                <h4 style="margin-bottom: 15px; color: #aaa;">Regels, Straffen & Hints</h4>
 
-<div class="flex-row">
-    <div class="form-group">
-        <label>⏱️ Anti-Google Timer (sec, 0 = uit)</label>
-        <input type="number" id="puzzle-timer" min="0" value="0" placeholder="Bv. 0">
-    </div>
-    <div class="form-group">
-        <label>🏆 Max Punten</label>
-        <input type="number" id="puzzle-points" min="1" value="30" placeholder="Bv. 30">
-    </div>
-</div>
+                <div class="flex-row">
+                    <div class="form-group">
+                        <label>⏱️ Anti-Google Timer (sec, max 99, 0 = uit)</label>
+                        <input type="number" id="puzzle-timer" min="0" max="99" value="0" placeholder="Bv. 0">
+                    </div>
+                    <div class="form-group">
+                        <label>🏆 Max Punten</label>
+                        <input type="number" id="puzzle-points" min="1" value="30" placeholder="Bv. 30">
+                    </div>
+                </div>
 
-<div class="flex-row">
-    <div class="form-group">
-        <label>🐔 Chicken Penalty (0 = uit)</label>
-        <input type="number" id="puzzle-chicken" min="0" value="0" placeholder="Bv. 0">
-    </div>
-    <div class="form-group">
-        <label>❌ Straf per fout antwoord</label>
-        <input type="number" id="puzzle-penalty" min="0" value="10" placeholder="Bv. 10">
-    </div>
-</div>
+                <div class="flex-row">
+                    <div class="form-group">
+                        <label>🐔 Chicken Penalty (0 = uit)</label>
+                        <input type="number" id="puzzle-chicken" min="0" value="0" placeholder="Bv. 0">
+                    </div>
+                    <div class="form-group">
+                        <label>❌ Straf per fout antwoord</label>
+                        <input type="number" id="puzzle-penalty" min="0" value="10" placeholder="Bv. 10">
+                    </div>
+                </div>
                 <div style="background: var(--bg-panel); padding: 15px; border-radius: 4px; margin-top: 15px; border-left: 4px solid #4285F4;">
                     <h5 style="margin-bottom: 10px; font-size: 1rem; color: #4285F4;">💡 Hints voor de Speler (Optioneel)</h5>
                     <div class="form-group">
@@ -512,7 +511,7 @@
             document.getElementById('puzzle-name').value = puzzle.puzzle_name;
             document.getElementById('draft-question').value = puzzle.question || '';
             document.getElementById('draft-answer').value = puzzle.answer || '';
-            document.getElementById('puzzle-timer').value = puzzle.google_timer || 0;
+            document.getElementById('puzzle-timer').value = Math.min(99, puzzle.google_timer || 0);
             document.getElementById('puzzle-points').value = puzzle.max_reward || 30;
             document.getElementById('puzzle-chicken').value = puzzle.chicken_penalty || 0;
             document.getElementById('puzzle-penalty').value = puzzle.wrong_penalty || 10;
@@ -542,11 +541,9 @@
             openTab('tab-stats');
         }
 
-        // VERWIJDEREN OP BASIS VAN PUZZELNAAM (beide deuren)
         async function deletePuzzleByName(puzzleName) {
             if (!confirm(`Weet je zeker dat je puzzel "${puzzleName}" (beide deuren) wilt verwijderen?`)) return;
 
-            // Verwijder zowel de originele als de (Target) variant uit de database
             const { error } = await supabaseClient
                 .from('Puzzle_Labyrinth')
                 .delete()
@@ -581,7 +578,6 @@
             }
         }
 
-        // PUBLICEREN OF BIJWERKEN
         document.getElementById('btn-publish-puzzle').addEventListener('click', async () => {
             const msgBox = document.getElementById('publish-message');
             const editId = document.getElementById('edit-puzzle-id').value;
@@ -589,10 +585,14 @@
             const puzzleName = document.getElementById('puzzle-name').value.trim() || 'New Puzzle';
             const question = document.getElementById('draft-question').value.trim();
             const answer = document.getElementById('draft-answer').value.trim();
-const timer = Math.max(0, parseInt(document.getElementById('puzzle-timer').value) || 0);
-const points = Math.max(1, parseInt(document.getElementById('puzzle-points').value) || 30);
-const chicken = Math.max(0, parseInt(document.getElementById('puzzle-chicken').value) || 0);
-const penalty = Math.max(0, parseInt(document.getElementById('puzzle-penalty').value) || 10);
+            
+            // Streng begrensde timer tot max 99 seconden
+            let timer = parseInt(document.getElementById('puzzle-timer').value) || 0;
+            timer = Math.max(0, Math.min(99, timer));
+
+            const points = Math.max(1, parseInt(document.getElementById('puzzle-points').value) || 30);
+            const chicken = Math.max(0, parseInt(document.getElementById('puzzle-chicken').value) || 0);
+            const penalty = Math.max(0, parseInt(document.getElementById('puzzle-penalty').value) || 10);
             const hint1 = document.getElementById('hint-1').value.trim();
             const hint2 = document.getElementById('hint-2').value.trim();
             const revealAnswer = document.getElementById('reveal-answer-optie').value;
@@ -609,16 +609,13 @@ const penalty = Math.max(0, parseInt(document.getElementById('puzzle-penalty').v
                 return;
             }
 
-            // BEWERKEN VAN BESTAANDE PUZZEL
             if (editId) {
                 msgBox.textContent = "Wijzigingen opslaan...";
                 msgBox.style.color = "var(--warning)";
 
-                // Haal eerst de oude naam op om ook de target te kunnen updaten
                 const oldPuzzle = uniqueDesignerPuzzles.find(p => p.id == editId);
                 const oldName = oldPuzzle ? oldPuzzle.puzzle_name : puzzleName;
 
-                // Update alle rijen die horen bij deze puzzelnaam voor deze designer
                 const { error: updateError } = await supabaseClient
                     .from('Puzzle_Labyrinth')
                     .update({
@@ -636,7 +633,6 @@ const penalty = Math.max(0, parseInt(document.getElementById('puzzle-penalty').v
                     .eq('designer_id', currentUserId)
                     .eq('puzzle_name', oldName);
 
-                // Update ook de target rijen
                 await supabaseClient
                     .from('Puzzle_Labyrinth')
                     .update({
@@ -666,7 +662,6 @@ const penalty = Math.max(0, parseInt(document.getElementById('puzzle-penalty').v
                 return;
             }
 
-            // NIEUWE PUZZEL PUBLICEREN
             msgBox.textContent = "Labyrint analyseren en puzzel publiceren...";
             msgBox.style.color = "var(--warning)";
 
@@ -927,7 +922,7 @@ const penalty = Math.max(0, parseInt(document.getElementById('puzzle-penalty').v
             await supabaseClient.auth.signOut();
         });
 
-function openTab(tabId) {
+        function openTab(tabId) {
             document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
@@ -936,9 +931,7 @@ function openTab(tabId) {
             if (activeBtn) activeBtn.classList.add('active');
         }
 
-        // Specifieke functie als je op 'Nieuwe Puzzel' in het menu klikt
         function clickNieuwePuzzelMenu() {
-            // Als we nog in bewerk-modus zaten, reset het formulier eerst volledig
             if (document.getElementById('edit-puzzle-id').value !== '') {
                 cancelEditMode();
             } else {
