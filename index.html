@@ -830,7 +830,8 @@
                 msgBox.textContent = "Fout bij publiceren: " + insertError.message;
             } else {
                 msgBox.style.color = "var(--success)";
-                msgBox.textContent = `🚀 Puzzel succesvol geplaatst tussen Kamer ${selectedRoomId} en ${targetRoomId}!`;
+
+				msgBox.innerHTML = `<img src="succ_publ_symb.png" style="width:16px; vertical-align:middle; margin-right:4px;" alt=""> Puzzel succesvol geplaatst tussen Kamer ${selectedRoomId} en ${targetRoomId}!`;
                 document.getElementById('puzzle-form').reset();
                 togglePaidCreditsInput();
                 qCount.textContent = "0 / 300";
