@@ -657,13 +657,11 @@
                 return;
             }
 
-            if (editId) {
+if (editId) {
                 msgBox.textContent = "Wijzigingen opslaan...";
                 msgBox.style.color = "var(--warning)";
 
-                const oldPuzzle = uniqueDesignerPuzzles.find(p => p.id == editId);
-                const oldName = oldPuzzle ? oldPuzzle.puzzle_name : puzzleName;
-
+                // Update de Source kant op basis van het unieke ID
                 const { error: updateError } = await supabaseClient
                     .from('Puzzle_Labyrinth')
                     .update({
@@ -679,9 +677,10 @@
                         reveal_answer: revealAnswer,
                         credits_cost: creditsCost
                     })
-                    .eq('designer_id', currentUserId)
-                    .eq('puzzle_name', oldName);
+                    .eq('id', editId); // Direct filteren op het unieke ID!
 
+                // Zoek de bijbehorende Target kant en update deze ook
+                // (Optioneel: je kunt hier ook op room_id / wall_side filteren als je het ID van de target niet direct hebt)
                 await supabaseClient
                     .from('Puzzle_Labyrinth')
                     .update({
