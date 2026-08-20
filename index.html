@@ -510,7 +510,7 @@
                         </td>
                         <td style="text-align: center;">
                             <button class="btn" style="padding: 5px 10px; margin: 0 5px 0 0; background-color: var(--primary);" onclick="prepareEditPuzzle('${escapeHtml(p.puzzle_name)}')">Edit</button>
-                            <br><br><button class="btn" style="padding: 5px 10px; margin: 0; background-color: var(--danger);" onclick="deletePuzzleByName('${escapeHtml(p.puzzle_name)}')">Delete</button>
+                            <br><button class="btn" style="padding: 5px 10px; margin: 0; background-color: var(--danger);" onclick="deletePuzzleByName('${escapeHtml(p.puzzle_name)}')">Delete</button>
                         </td>
                     `;
                     tableBody.appendChild(row);
