@@ -667,7 +667,7 @@
                 const { error: updateError } = await supabaseClient
                     .from('Puzzle_Labyrinth')
                     .update({
-                        puzzle_name: puzzleName, + ' (Source)',
+                        puzzle_name: puzzleName + ' (Source)',
                         question: question,
                         answer: answer,
                         google_timer: timer,
