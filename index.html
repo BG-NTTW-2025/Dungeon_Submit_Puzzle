@@ -332,7 +332,7 @@
                 <div class="stat-card" style="border-color: var(--success);">
                     <h4>Ontvangen Waardering</h4>
                     <p style="font-size: 1.3rem; margin-top: 5px;">
-                        <span style="color: var(--success);" id="stat-total-likes"><img src="rinth_symb.png" class="tab-icon" alt=""> 0</span> &nbsp;&nbsp; <br>
+                        <span style="color: var(--success);" id="stat-total-likes"><img src="like_green_symb.png" class="tab-icon" alt=""> 0</span> <br>
                         <span style="color: var(--danger);" id="stat-total-dislikes"><img src="disLike_red_symb.png" class="tab-icon" alt=""> 0</span>
                     </p>
                 </div>
@@ -505,12 +505,12 @@
                     row.innerHTML = `
                         <td>${escapeHtml(p.puzzle_name)}</td>
                         <td style="text-align: center;">
-                            <span style="color: var(--success); font-weight: bold;"><img src="like_green_symb.png" class="tab-icon" alt=""> ${p.likes}</span> &nbsp;&nbsp;<br>
+                            <span style="color: var(--success); font-weight: bold;"><img src="like_green_symb.png" class="tab-icon" alt=""> ${p.likes}</span> <br>
                             <span style="color: var(--danger); font-weight: bold;"><img src="disLike_red_symb.png" class="tab-icon" alt=""> ${p.dislikes || 0}</span>
                         </td>
                         <td style="text-align: center;">
                             <button class="btn" style="padding: 5px 10px; margin: 0 5px 0 0; background-color: var(--primary);" onclick="prepareEditPuzzle('${escapeHtml(p.puzzle_name)}')">Edit</button>
-                            <br><button class="btn" style="padding: 5px 10px; margin: 0; background-color: var(--danger);" onclick="deletePuzzleByName('${escapeHtml(p.puzzle_name)}')">Delete</button>
+                            <br><br><button class="btn" style="padding: 5px 10px; margin: 0; background-color: var(--danger);" onclick="deletePuzzleByName('${escapeHtml(p.puzzle_name)}')">Delete</button>
                         </td>
                     `;
                     tableBody.appendChild(row);
