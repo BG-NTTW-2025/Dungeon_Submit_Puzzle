@@ -290,11 +290,17 @@
                 
                 <div class="form-group">
                     <label>Wat gebeurt er na 3 foute pogingen?</label>
-                    <select id="reveal-answer-optie">
+                    <select id="reveal-answer-optie" onchange="togglePaidCreditsInput()">
                         <option value="free_answer" selected>Ja, toon antwoord gratis</option>
                         <option value="no_answer">Nee, antwoord blijft geheim</option>
                         <option value="paid_answer">Ja, antwoord tegen betaling (Credits)</option>
                     </select>
+                </div>
+
+                <!-- Extra veld voor aantal credits, standaard verborgen tenzij betaald is gekozen -->
+                <div class="form-group" id="paid-credits-group" style="display: none; margin-top: 10px;">
+                    <label>🪙 Aantal benodigde Credits (max 99)</label>
+                    <input type="number" id="puzzle-credits-cost" min="1" max="99" value="5" placeholder="Bv. 5">
                 </div>
 
                 <p id="publish-message" style="color: var(--warning); font-size: 0.9rem; margin-bottom: 10px;"></p>
@@ -359,6 +365,16 @@
 
         qInput.addEventListener('input', () => { qCount.textContent = `${qInput.value.length} / 300`; });
         sInput.addEventListener('input', () => { sCount.textContent = `${sInput.value.length} / 100`; });
+
+        function togglePaidCreditsInput() {
+            const selectVal = document.getElementById('reveal-answer-optie').value;
+            const creditsGroup = document.getElementById('paid-credits-group');
+            if (selectVal === 'paid_answer') {
+                creditsGroup.style.display = 'block';
+            } else {
+                creditsGroup.style.display = 'none';
+            }
+        }
 
         function toggleAuthView(view) {
             document.getElementById('auth-message-login').textContent = '';
@@ -518,6 +534,10 @@
             document.getElementById('hint-1').value = puzzle.hint_1 || '';
             document.getElementById('hint-2').value = puzzle.hint_2 || '';
             document.getElementById('reveal-answer-optie').value = puzzle.reveal_answer || 'free_answer';
+            
+            // Zet credits kosten als dat aanwezig is
+            document.getElementById('puzzle-credits-cost').value = Math.min(99, puzzle.credits_cost || 5);
+            togglePaidCreditsInput();
 
             qCount.textContent = `${(puzzle.question || '').length} / 300`;
             sCount.textContent = `${(puzzle.answer || '').length} / 100`;
@@ -536,6 +556,7 @@
             document.getElementById('btn-publish-puzzle').textContent = "🚀 Publiceer Puzzel";
             document.getElementById('btn-cancel-edit').style.display = 'none';
             document.getElementById('publish-message').textContent = '';
+            togglePaidCreditsInput();
             qCount.textContent = "0 / 300";
             sCount.textContent = "0 / 100";
             openTab('tab-stats');
@@ -599,6 +620,9 @@
             let penalty = parseInt(document.getElementById('puzzle-penalty').value) || 10;
             penalty = Math.max(0, Math.min(99, penalty));
 
+            let creditsCost = parseInt(document.getElementById('puzzle-credits-cost').value) || 5;
+            creditsCost = Math.max(1, Math.min(99, creditsCost));
+
             const hint1 = document.getElementById('hint-1').value.trim();
             const hint2 = document.getElementById('hint-2').value.trim();
             const revealAnswer = document.getElementById('reveal-answer-optie').value;
@@ -634,7 +658,8 @@
                         wrong_penalty: penalty,
                         hint_1: hint1 || null,
                         hint_2: hint2 || null,
-                        reveal_answer: revealAnswer
+                        reveal_answer: revealAnswer,
+                        credits_cost: creditsCost
                     })
                     .eq('designer_id', currentUserId)
                     .eq('puzzle_name', oldName);
@@ -651,7 +676,8 @@
                         wrong_penalty: penalty,
                         hint_1: hint1 || null,
                         hint_2: hint2 || null,
-                        reveal_answer: revealAnswer
+                        reveal_answer: revealAnswer,
+                        credits_cost: creditsCost
                     })
                     .eq('designer_id', currentUserId)
                     .eq('puzzle_name', oldName + ' (Target)');
@@ -751,6 +777,7 @@
                         hint_1: hint1 || null,
                         hint_2: hint2 || null,
                         reveal_answer: revealAnswer,
+                        credits_cost: creditsCost,
                         likes: 0,
                         room_id: selectedRoomId,
                         wall_side: selectedWall,
@@ -769,6 +796,7 @@
                         hint_1: hint1 || null,
                         hint_2: hint2 || null,
                         reveal_answer: revealAnswer,
+                        credits_cost: creditsCost,
                         likes: 0,
                         room_id: targetRoomId,
                         wall_side: oppositeWall,
@@ -784,6 +812,7 @@
                 msgBox.style.color = "var(--success)";
                 msgBox.textContent = `🚀 Puzzel succesvol geplaatst tussen Kamer ${selectedRoomId} en ${targetRoomId}!`;
                 document.getElementById('puzzle-form').reset();
+                togglePaidCreditsInput();
                 qCount.textContent = "0 / 300";
                 sCount.textContent = "0 / 100";
                 loadDesignerPuzzles(currentUserId);
