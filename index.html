@@ -41,6 +41,10 @@
         .tab-button:hover { background-color: var(--primary); }
         .tab-button.active { background-color: var(--primary); border-left: 4px solid var(--accent); font-weight: bold; }
 
+        .tab-icon {
+            width: 20px; height: 20px; object-fit: contain; vertical-align: middle;
+        }
+
         .main-content {
             flex-grow: 1; height: 100%; padding: 40px; overflow-y: auto; background-color: var(--bg-dark);
         }
@@ -64,7 +68,7 @@
         }
 
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
         input[type="text"], input[type="number"], input[type="email"], input[type="password"], select, textarea {
             width: 100%; padding: 12px; border-radius: 4px; border: 1px solid var(--primary); background-color: var(--bg-dark); color: var(--text-light); font-size: 1rem;
         }
@@ -108,9 +112,9 @@
 
     <div class="sidebar">
         <h2>Puzzle Designer</h2>
-        <button class="tab-button active" onclick="openTab('tab-profile')">⚙️ Profiel & Login</button>
-        <button class="tab-button" onclick="clickNieuwePuzzelMenu()" id="nav-create" style="display:none;">🧩 Nieuwe Puzzel</button>
-        <button class="tab-button" onclick="openTab('tab-stats')" id="nav-stats" style="display:none;">📊 Mijn Creaties</button>
+        <button class="tab-button active" onclick="openTab('tab-profile')"><img src="settings_sym.png" class="tab-icon" alt=""> Profiel & Login</button>
+        <button class="tab-button" onclick="clickNieuwePuzzelMenu()" id="nav-create" style="display:none;"><img src="puzzle_piece_sym.png" class="tab-icon" alt=""> Nieuwe Puzzel</button>
+        <button class="tab-button" onclick="openTab('tab-stats')" id="nav-stats" style="display:none;"><img src="my_creation_symb.png" class="tab-icon" alt=""> Mijn Creaties</button>
     </div>
 
     <div class="main-content">
@@ -180,7 +184,7 @@
                     <div id="profile-section" style="display:none;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                             <p style="font-size: 1.2rem; margin: 0;">Welkom terug, <strong id="display-username" style="color: var(--accent);">Ontwerper</strong>!</p>
-                            <button class="btn-outline" style="padding: 5px 10px; border-radius: 50%; font-size: 1.2rem;" onclick="togglePasswordSection()" title="Instellingen">⚙️</button>
+                            <button class="btn-outline" style="padding: 5px 10px; border-radius: 50%; font-size: 1.2rem;" onclick="togglePasswordSection()" title="Instellingen"><img src="settings_sym.png" class="tab-icon" alt=""></button>
                         </div>
                         
                         <p style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">Jouw unieke Systeem User ID:</p>
@@ -254,27 +258,27 @@
 
                 <div class="flex-row">
                     <div class="form-group">
-                        <label>⏱️ Anti-Google Timer (sec, max 99, 0 = uit)</label>
+                        <label><img src="google_sym.png" class="tab-icon" alt=""> Anti-Google Timer (sec, max 99, 0 = uit)</label>
                         <input type="number" id="puzzle-timer" min="0" max="99" value="0" placeholder="Bv. 0">
                     </div>
                     <div class="form-group">
-                        <label>🏆 Max Punten (max 99)</label>
+                        <label><img src="gain_points.png" class="tab-icon" alt=""> Max Punten (max 99)</label>
                         <input type="number" id="puzzle-points" min="1" max="99" value="30" placeholder="Bv. 30">
                     </div>
                 </div>
 
                 <div class="flex-row">
                     <div class="form-group">
-                        <label>🐔 Chicken Penalty (max 99, 0 = uit)</label>
+                        <label><img src="Chicken_symb.png" class="tab-icon" alt=""> Chicken Penalty (max 99, 0 = uit)</label>
                         <input type="number" id="puzzle-chicken" min="0" max="99" value="0" placeholder="Bv. 0">
                     </div>
                     <div class="form-group">
-                        <label>❌ Straf per fout antwoord (max 99)</label>
+                        <label><img src="faul.symb.png" class="tab-icon" alt=""> Straf per fout antwoord (max 99)</label>
                         <input type="number" id="puzzle-penalty" min="0" max="99" value="10" placeholder="Bv. 10">
                     </div>
                 </div>
                 <div style="background: var(--bg-panel); padding: 15px; border-radius: 4px; margin-top: 15px; border-left: 4px solid #4285F4;">
-                    <h5 style="margin-bottom: 10px; font-size: 1rem; color: #4285F4;">💡 Hints voor de Speler (Optioneel)</h5>
+                    <h5 style="margin-bottom: 10px; font-size: 1rem; color: #4285F4; display: flex; align-items: center; gap: 6px;"><img src="hint_symb.png" class="tab-icon" alt=""> Hints voor de Speler (Optioneel)</h5>
                     <div class="form-group">
                         <label>Hint 1 (Getoond bij 1e foute gok)</label>
                         <input type="text" id="hint-1" placeholder="Kleine tip...">
@@ -297,7 +301,6 @@
                     </select>
                 </div>
 
-                <!-- Extra veld voor aantal credits, standaard verborgen tenzij betaald is gekozen -->
                 <div class="form-group" id="paid-credits-group" style="display: none; margin-top: 10px;">
                     <label>🪙 Aantal benodigde Credits (max 99)</label>
                     <input type="number" id="puzzle-credits-cost" min="1" max="99" value="5" placeholder="Bv. 5">
@@ -307,8 +310,8 @@
 
                 <div style="margin-top: 20px; text-align: right; display: flex; justify-content: flex-end; gap: 10px;">
                     <button type="button" class="btn" id="btn-cancel-edit" style="background-color: #555; display: none;" onclick="cancelEditMode()">Annuleren</button>
-                    <button type="button" class="btn" style="background-color: #555;" onclick="saveDraft()">💾 Lokaal Opslaan</button>
-                    <button type="button" class="btn" id="btn-publish-puzzle" style="background-color: var(--success);">🚀 Publiceer Puzzel</button>
+                    <button type="button" class="btn" style="background-color: #555;" onclick="saveDraft()"><img src="local_save_symb.png" class="tab-icon" alt=""> Lokaal Opslaan</button>
+                    <button type="button" class="btn" id="btn-publish-puzzle" style="background-color: var(--success);"><img src="publish_symb.png" class="tab-icon" alt=""> Publiceer Puzzel</button>
                 </div>
             </form>
         </div>
@@ -324,11 +327,14 @@
                 </div>
                 <div class="stat-card" style="border-color: gold;">
                     <h4>Mijn Credits</h4>
-                    <p id="stat-total-credits" style="color: gold;">0 🪙</p>
+                    <p id="stat-total-credits" style="color: gold;">0 <img src="rinth_symb.png" class="tab-icon" alt=""></p>
                 </div>
                 <div class="stat-card" style="border-color: var(--success);">
-                    <h4>Totaal Ontvangen Likes 👍</h4>
-                    <p id="stat-total-likes" style="color: var(--success);">0</p>
+                    <h4>Ontvangen Waardering</h4>
+                    <p style="font-size: 1.3rem; margin-top: 5px;">
+                        <span style="color: var(--success);" id="stat-total-likes"><img src="Like_green_symb.png" class="tab-icon" alt=""> 0</span> &nbsp;&nbsp; 
+                        <span style="color: var(--danger);" id="stat-total-dislikes"><img src="disLike_red_symb.png" class="tab-icon" alt=""> 0</span>
+                    </p>
                 </div>
             </div>
 
@@ -336,7 +342,7 @@
                 <thead>
                     <tr>
                         <th>Puzzelnaam</th>
-                        <th style="text-align: center;">Likes 👍</th>
+                        <th style="text-align: center;">Waardering</th>
                         <th style="text-align: center;">Acties</th>
                     </tr>
                 </thead>
@@ -438,7 +444,7 @@
                 document.getElementById('display-username').textContent = designerData.username;
                 
                 renderAvatar(designerData.avatar);
-                document.getElementById('stat-total-credits').textContent = (designerData.credits_balance || 0) + ' 🪙';
+                document.getElementById('stat-total-credits').innerHTML = (designerData.credits_balance || 0) + ' <img src="rinth_symb.png" class="tab-icon" alt="">';
 
                 document.getElementById('nav-create').style.display = 'flex'; 
                 document.getElementById('nav-stats').style.display = 'flex'; 
@@ -466,30 +472,42 @@
             const tableBody = document.getElementById('designer-puzzles-table');
             const countElem = document.getElementById('stat-total-puzzles');
             const likesElem = document.getElementById('stat-total-likes');
+            const dislikesElem = document.getElementById('stat-total-dislikes');
 
             if (puzzles && puzzles.length > 0) {
                 const uniqueMap = new Map();
                 puzzles.forEach(p => {
                     let cleanName = (p.puzzle_name || 'New Puzzle').replace(' (Target)', '');
                     if (!uniqueMap.has(cleanName)) {
-                        uniqueMap.set(cleanName, { ...p, puzzle_name: cleanName, likes: p.likes || 0 });
+                        uniqueMap.set(cleanName, { 
+                            ...p, 
+                            puzzle_name: cleanName, 
+                            likes: p.likes || 0,
+                            dislikes: p.dislikes || 0 
+                        });
                     } else {
                         let existing = uniqueMap.get(cleanName);
                         existing.likes += (p.likes || 0);
+                        existing.dislikes += (p.dislikes || 0);
                     }
                 });
 
                 uniqueDesignerPuzzles = Array.from(uniqueMap.values());
                 countElem.textContent = uniqueDesignerPuzzles.length;
                 let totalLikes = 0;
+                let totalDislikes = 0;
                 tableBody.innerHTML = '';
 
                 uniqueDesignerPuzzles.forEach(p => {
                     totalLikes += p.likes;
+                    totalDislikes += p.dislikes || 0;
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${escapeHtml(p.puzzle_name)}</td>
-                        <td style="text-align: center; color: var(--success); font-weight: bold;">${p.likes} 👍</td>
+                        <td style="text-align: center;">
+                            <span style="color: var(--success); font-weight: bold;"><img src="Like_green_symb.png" class="tab-icon" alt=""> ${p.likes}</span> &nbsp;&nbsp;
+                            <span style="color: var(--danger); font-weight: bold;"><img src="disLike_red_symb.png" class="tab-icon" alt=""> ${p.dislikes || 0}</span>
+                        </td>
                         <td style="text-align: center;">
                             <button class="btn" style="padding: 5px 10px; margin: 0 5px 0 0; background-color: var(--primary);" onclick="prepareEditPuzzle('${escapeHtml(p.puzzle_name)}')">Edit</button>
                             <button class="btn" style="padding: 5px 10px; margin: 0; background-color: var(--danger);" onclick="deletePuzzleByName('${escapeHtml(p.puzzle_name)}')">Delete</button>
@@ -497,11 +515,13 @@
                     `;
                     tableBody.appendChild(row);
                 });
-                likesElem.textContent = totalLikes;
+                likesElem.innerHTML = `<img src="Like_green_symb.png" class="tab-icon" alt=""> ${totalLikes}`;
+                dislikesElem.innerHTML = `<img src="disLike_red_symb.png" class="tab-icon" alt=""> ${totalDislikes}`;
             } else {
                 uniqueDesignerPuzzles = [];
                 countElem.textContent = '0';
-                likesElem.textContent = '0';
+                likesElem.innerHTML = `<img src="Like_green_symb.png" class="tab-icon" alt=""> 0`;
+                dislikesElem.innerHTML = `<img src="disLike_red_symb.png" class="tab-icon" alt=""> 0`;
                 tableBody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #888;">Nog geen puzzels gevonden. Maak er een aan bij 'Nieuwe Puzzel'!</td></tr>`;
             }
         }
@@ -535,7 +555,6 @@
             document.getElementById('hint-2').value = puzzle.hint_2 || '';
             document.getElementById('reveal-answer-optie').value = puzzle.reveal_answer || 'free_answer';
             
-            // Zet credits kosten als dat aanwezig is
             document.getElementById('puzzle-credits-cost').value = Math.min(99, puzzle.credits_cost || 5);
             togglePaidCreditsInput();
 
@@ -543,7 +562,7 @@
             sCount.textContent = `${(puzzle.answer || '').length} / 100`;
 
             document.getElementById('form-title').textContent = "Puzzel Bewerken";
-            document.getElementById('btn-publish-puzzle').textContent = "💾 Wijzigingen Opslaan";
+            document.getElementById('btn-publish-puzzle').innerHTML = '<img src="publish_symb.png" class="tab-icon" alt=""> Wijzigingen Opslaan';
             document.getElementById('btn-cancel-edit').style.display = 'inline-block';
 
             openTab('tab-create');
@@ -553,7 +572,7 @@
             document.getElementById('puzzle-form').reset();
             document.getElementById('edit-puzzle-id').value = '';
             document.getElementById('form-title').textContent = "Nieuwe Puzzel / Kamer Ontwerpen";
-            document.getElementById('btn-publish-puzzle').textContent = "🚀 Publiceer Puzzel";
+            document.getElementById('btn-publish-puzzle').innerHTML = '<img src="publish_symb.png" class="tab-icon" alt=""> Publiceer Puzzel';
             document.getElementById('btn-cancel-edit').style.display = 'none';
             document.getElementById('publish-message').textContent = '';
             togglePaidCreditsInput();
@@ -607,7 +626,6 @@
             const question = document.getElementById('draft-question').value.trim();
             const answer = document.getElementById('draft-answer').value.trim();
             
-            // Streng begrensde waardes tot max 99
             let timer = parseInt(document.getElementById('puzzle-timer').value) || 0;
             timer = Math.max(0, Math.min(99, timer));
 
@@ -779,6 +797,7 @@
                         reveal_answer: revealAnswer,
                         credits_cost: creditsCost,
                         likes: 0,
+                        dislikes: 0,
                         room_id: selectedRoomId,
                         wall_side: selectedWall,
                         pos_x: currentRoomCoord.x,
@@ -798,6 +817,7 @@
                         reveal_answer: revealAnswer,
                         credits_cost: creditsCost,
                         likes: 0,
+                        dislikes: 0,
                         room_id: targetRoomId,
                         wall_side: oppositeWall,
                         pos_x: targetX,
