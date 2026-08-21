@@ -581,21 +581,49 @@
             openTab('tab-stats');
         }
 
+        // PUNT 5: Puzzel verwijderen en direct omzetten naar een open doorgang (geen muur/opsluiting)
         async function deletePuzzleByName(puzzleName) {
-            if (!confirm(`Weet je zeker dat je puzzel "${puzzleName}" (beide deuren) wilt verwijderen?`)) return;
+            if (!confirm(`Weet je zeker dat je puzzel "${puzzleName}" wilt verwijderen? De deuren worden direct omgezet in open doorgangen zodat spelers niet opgesloten raken.`)) return;
 
-            const { error } = await supabaseClient
+            // 1. Haal eerst de records op die bij deze puzzel horen om te weten welke kamers/muren het betreft
+            const { data: targetPuzzles, error: fetchError } = await supabaseClient
                 .from('Puzzle_Labyrinth')
-                .delete()
+                .select('*')
                 .eq('designer_id', currentUserId)
                 .in('puzzle_name', [puzzleName, puzzleName + ' (Target)']);
 
-            if (error) {
-                alert("Fout bij verwijderen: " + error.message);
-            } else {
-                alert("Puzzel succesvol verwijderd uit het labyrint!");
-                loadDesignerPuzzles(currentUserId);
+            if (fetchError) {
+                alert("Fout bij ophalen puzzelgegevens: " + fetchError.message);
+                return;
             }
+
+            if (targetPuzzles && targetPuzzles.length > 0) {
+                // 2. Zet voor elke gevonden deur de puzzel-data op NULL en markeer als open doorgang
+                for (let p of targetPuzzles) {
+                    await supabaseClient
+                        .from('Puzzle_Labyrinth')
+                        .update({
+                            puzzle_name: null,
+                            question: null,
+                            answer: null,
+                            google_timer: 0,
+                            max_reward: 0,
+                            chicken_penalty: 0,
+                            wrong_penalty: 0,
+                            hint_1: null,
+                            hint_2: null,
+                            reveal_answer: 'free_answer',
+                            credits_cost: 0,
+                            likes: 0,
+                            dislikes: 0,
+                            is_open: true // Optioneel veld om aan te geven dat deze doorgang open is
+                        })
+                        .eq('id', p.id);
+                }
+            }
+
+            alert("Puzzel is verwijderd en de doorgangen zijn opengezet voor spelers!");
+            loadDesignerPuzzles(currentUserId);
         }
 
         function getOppositeWall(wall) {
@@ -801,7 +829,8 @@
                         room_id: selectedRoomId,
                         wall_side: selectedWall,
                         pos_x: currentRoomCoord.x,
-                        pos_y: currentRoomCoord.y
+                        pos_y: currentRoomCoord.y,
+                        is_open: false
                     },
                     {
                         designer_id: currentUserId,
@@ -821,7 +850,8 @@
                         room_id: targetRoomId,
                         wall_side: oppositeWall,
                         pos_x: targetX,
-                        pos_y: targetY
+                        pos_y: targetY,
+                        is_open: false
                     }
                 ]);
 
@@ -830,8 +860,7 @@
                 msgBox.textContent = "Fout bij publiceren: " + insertError.message;
             } else {
                 msgBox.style.color = "var(--success)";
-
-				msgBox.innerHTML = `<img src="succ_publ_symb.png" style="width:16px; vertical-align:middle; margin-right:4px;" alt=""> Puzzel succesvol geplaatst tussen Kamer ${selectedRoomId} en ${targetRoomId}!`;
+                msgBox.innerHTML = `<img src="succ_publ_symb.png" style="width:16px; vertical-align:middle; margin-right:4px;" alt=""> Puzzel succesvol geplaatst tussen Kamer ${selectedRoomId} en ${targetRoomId}!`;
                 document.getElementById('puzzle-form').reset();
                 togglePaidCreditsInput();
                 qCount.textContent = "0 / 300";
