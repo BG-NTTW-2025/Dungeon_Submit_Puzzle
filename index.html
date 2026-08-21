@@ -930,24 +930,34 @@ async function deletePuzzleByName(puzzleName) {
 
             msgBox.textContent = "Account aanmaken...";
 
-const { data, error } = await supabaseClient.auth.signUp({ 
-    email: email, 
-    password: password,
-    options: {
-        data: {
-            name: username // Geef de gebruikersnaam mee aan de trigger!
-        },
-        emailRedirectTo: 'https://bg-nttw-2025.github.io/Dungeon_Submit_Puzzle/'
-    }
-});
+msgBox.textContent = "Account aanmaken...";
 
-if (error) { 
-    msgBox.style.color = "var(--accent)";
-    msgBox.textContent = "Fout: " + error.message; 
-} else { 
-    msgBox.style.color = "var(--success)"; 
-    msgBox.textContent = "Registratie succesvol! Controleer je e-mail om de registratie te bevestigen."; 
-}
+    const { data, error } = await supabaseClient.auth.signUp({ 
+        email: email, 
+        password: password,
+        options: {
+            emailRedirectTo: 'https://bg-nttw-2025.github.io/Dungeon_Submit_Puzzle/' // Zorg dat dit exact jouw pagina is
+        }
+    });
+
+    if (error) { 
+        msgBox.style.color = "var(--accent)";
+        msgBox.textContent = "Fout: " + error.message; 
+    } else { 
+        // Als de gebruiker is aangemaakt, slaan we direct de gekozen username op in de designers tabel
+        if (data.user) {
+            const { error: dbError } = await supabaseClient.from('designers').insert([
+                { id: data.user.id, username: username }
+            ]);
+            
+            if (dbError) {
+                console.error("Fout bij opslaan profiel in tabel:", dbError.message);
+            }
+        }
+
+        msgBox.style.color = "var(--success)"; 
+        msgBox.textContent = "Registratie succesvol! Controleer je e-mail om de registratie te bevestigen."; 
+    }
         });
 
         document.getElementById('btn-save-google-username').addEventListener('click', async () => {
