@@ -463,11 +463,13 @@
             }
         }
 
-        async function loadDesignerPuzzles(designerId) {
-            const { data: puzzles, error } = await supabaseClient
-                .from('Puzzle_Labyrinth')
-                .select('*')
-                .eq('designer_id', designerId);
+				async function loadDesignerPuzzles(designerId) {
+				const { data: puzzles, error } = await supabaseClient
+				.from('Puzzle_Labyrinth')
+				.select('*')
+				.eq('designer_id', designerId)
+				.eq('is_open', false)          // Filter open doorgangen eruit
+				.not('puzzle_name', 'is', null); // Filter rijen waar de naam leeg/null is eruit
 
             const tableBody = document.getElementById('designer-puzzles-table');
             const countElem = document.getElementById('stat-total-puzzles');
