@@ -2,9 +2,8 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Puzzle Designer - Dashboard</title>
-    <!-- SUPABASE JS BIBLIOTHEEK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -15,6 +14,7 @@
             --text-light: #e0e0e0;
             --success: #4caf50;
             --warning: #ff9800;
+            --danger: #ff3333;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -69,6 +69,8 @@
             width: 100%; padding: 12px; border-radius: 4px; border: 1px solid var(--primary); background-color: var(--bg-dark); color: var(--text-light); font-size: 1rem;
         }
 
+        .char-count { font-size: 0.8rem; color: #888; text-align: right; margin-top: 4px; }
+
         .flex-row { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
         .flex-row > div { flex: 1; min-width: 200px; }
 
@@ -92,6 +94,14 @@
         table { width: 100%; border-collapse: collapse; margin-top: 20px; background-color: var(--bg-dark); border-radius: 6px; overflow: hidden; }
         th { padding: 15px; text-align: left; background-color: var(--primary); }
         td { padding: 15px; border-bottom: 1px solid var(--primary); }
+
+        @media(max-width: 768px) {
+            html, body { flex-direction: column; overflow: auto; }
+            .sidebar { width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 10px; }
+            .sidebar h2 { display: none; }
+            .tab-button { padding: 10px 15px; font-size: 0.9rem; }
+            .main-content { padding: 15px; }
+        }
     </style>
 </head>
 <body>
@@ -99,19 +109,18 @@
     <div class="sidebar">
         <h2>Puzzle Designer</h2>
         <button class="tab-button active" onclick="openTab('tab-profile')">⚙️ Profiel & Login</button>
+				<button class="tab-button" onclick="clickNieuwePuzzelMenu()" id="nav-create" style="display:none;">🧩 Nieuwe Puzzel</button>
         <button class="tab-button" onclick="openTab('tab-create')" id="nav-create" style="display:none;">🧩 Nieuwe Puzzel</button>
         <button class="tab-button" onclick="openTab('tab-stats')" id="nav-stats" style="display:none;">📊 Mijn Creaties</button>
     </div>
 
     <div class="main-content">
 
-        <!-- TAB 1: Profiel -->
         <div id="tab-profile" class="tab-panel active">
             <h3>Account & Instellingen</h3>
             <div class="profile-layout">
                 
                 <div class="profile-left">
-                    <!-- INLOGGEN / REGISTREREN (Niet ingelogd) -->
                     <div id="login-form-view">
                         <p style="margin-bottom: 15px;">Log in op je ontwerpersaccount:</p>
                         <button class="btn" id="btn-google" style="background-color: #4285F4; width: 100%; margin-bottom: 20px;">Inloggen met Google</button>
@@ -131,7 +140,6 @@
                         </div>
                     </div>
 
-                    <!-- REGISTREREN SCHERM -->
                     <div id="register-form-view" style="display:none;">
                         <p style="margin-bottom: 15px; font-weight:bold; color: var(--accent);">Nieuw Ontwerpersaccount</p>
                         
@@ -157,7 +165,6 @@
                         </div>
                     </div>
 
-                    <!-- EXTRA SCHERM: USERNAME OPGEVEN VOOR GOOGLE GEBRUIKERS -->
                     <div id="google-username-view" style="display:none;">
                         <p style="margin-bottom: 15px; font-weight:bold; color: var(--accent);">Kies je Ontwerpersnaam</p>
                         <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 15px;">Je bent ingelogd via Google! Kies nog even een unieke heldennaam voor je profiel:</p>
@@ -171,7 +178,6 @@
                         <button class="btn" id="btn-save-google-username" style="width: 100%; background-color: var(--success);">Opslaan & Naar Dashboard</button>
                     </div>
 
-                    <!-- PROFIEL (Ingelogd) -->
                     <div id="profile-section" style="display:none;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                             <p style="font-size: 1.2rem; margin: 0;">Welkom terug, <strong id="display-username" style="color: var(--accent);">Ontwerper</strong>!</p>
@@ -181,7 +187,6 @@
                         <p style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">Jouw unieke Systeem User ID:</p>
                         <p id="display-user-id" style="font-size: 0.8rem; color: var(--success); background: var(--bg-dark); padding: 8px; border-radius: 4px; word-break: break-all; margin-bottom: 15px; border: 1px solid var(--primary);"></p>
 
-                        <!-- AVATAR URL INVOEREN -->
                         <div class="form-group" style="margin-top: 15px;">
                             <label style="font-size: 0.9rem;">Avatar Afbeeldings-URL</label>
                             <div style="display: flex; gap: 10px;">
@@ -201,7 +206,6 @@
                         <button class="btn" id="btn-logout" style="background-color: #ff3333; width: 100%;">Uitloggen</button>
                     </div>
 
-                    <!-- HULP & CONTACT -->
                     <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--primary); text-align: center;">
                         <p style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">Problemen met aanmelden?</p>
                         <a href="mailto:jaca.eis@gmail.com?subject=Probleem%20Puzzle%20Designer%20Aanmelding" style="font-size: 0.9rem; color: var(--accent); text-decoration: none; font-weight: bold;">📧 Neem contact op met de beheerder</a>
@@ -222,13 +226,13 @@
             </div>
         </div>
 
-        <!-- TAB 2: Puzzel Maken & Publiceren -->
         <div id="tab-create" class="tab-panel">
-            <h3>Nieuwe Puzzel / Kamer Ontwerpen</h3>
+            <h3 id="form-title">Nieuwe Puzzel / Kamer Ontwerpen</h3>
             <form id="puzzle-form">
+                <input type="hidden" id="edit-puzzle-id" value="">
                 
                 <div class="form-group">
-                    <label>Naam Puzzel (voor eigen administratie)</label>
+                    <label>Naam Puzzel (unieke identificatie)</label>
                     <input type="text" id="puzzle-name" placeholder="Bv. 'Logica Raadsel 1'">
                 </div>
 
@@ -236,48 +240,46 @@
 
                 <div class="form-group">
                     <label>Vraag / Raadsel</label>
-                    <textarea rows="4" placeholder="Typ hier het raadsel... (Tip: voor meerkeuze, schrijf de keuzes in de tekst, bv. A) ..., B) ...)" id="draft-question"></textarea>
+                    <textarea rows="4" maxlength="300" placeholder="Typ hier het raadsel..." id="draft-question"></textarea>
+                    <div id="qCount" class="char-count">0 / 300</div>
                 </div>
 
                 <div class="form-group">
-                    <label>Correcte Antwoord (Tip: gebruik bij meerkeuze de letter A, B of C)</label>
-                    <input type="text" id="draft-answer" placeholder="Vul hier het juiste antwoord in">
+                    <label>Correcte Antwoord</label>
+                    <input type="text" id="draft-answer" maxlength="100" placeholder="Vul hier het juiste antwoord in">
+                    <div id="sCount" class="char-count">0 / 100</div>
                 </div>
 
-                <hr style="border-color: var(--primary); margin: 30px 0;">
-                <h4 style="margin-bottom: 15px; color: #aaa;">Regels, Straffen & Hints</h4>
+<hr style="border-color: var(--primary); margin: 30px 0;">
+<h4 style="margin-bottom: 15px; color: #aaa;">Regels, Straffen & Hints</h4>
 
-                <div class="flex-row">
-                    <div class="form-group">
-                        <label>⏱️ Anti-Google Timer (sec)</label>
-                        <input type="number" id="puzzle-timer" value="15" placeholder="Bv. 15">
-                    </div>
-                    <div class="form-group">
-                        <label>🏆 Max Punten</label>
-                        <input type="number" id="puzzle-points" value="30" placeholder="Bv. 30">
-                    </div>
-                </div>
+<div class="flex-row">
+    <div class="form-group">
+        <label>⏱️ Anti-Google Timer (sec, 0 = uit)</label>
+        <input type="number" id="puzzle-timer" min="0" value="0" placeholder="Bv. 0">
+    </div>
+    <div class="form-group">
+        <label>🏆 Max Punten</label>
+        <input type="number" id="puzzle-points" min="1" value="30" placeholder="Bv. 30">
+    </div>
+</div>
 
-                <div class="flex-row">
-                    <div class="form-group">
-                        <label>🐔 Chicken Penalty (Vlucht-boete)</label>
-                        <input type="number" id="puzzle-chicken" value="50" placeholder="Bv. 50">
-                    </div>
-                    <div class="form-group">
-                        <label>❌ Straf per fout antwoord</label>
-                        <input type="number" id="puzzle-penalty" value="10" placeholder="Bv. 10">
-                    </div>
-                </div>
-
-                <!-- Hints -->
+<div class="flex-row">
+    <div class="form-group">
+        <label>🐔 Chicken Penalty (0 = uit)</label>
+        <input type="number" id="puzzle-chicken" min="0" value="0" placeholder="Bv. 0">
+    </div>
+    <div class="form-group">
+        <label>❌ Straf per fout antwoord</label>
+        <input type="number" id="puzzle-penalty" min="0" value="10" placeholder="Bv. 10">
+    </div>
+</div>
                 <div style="background: var(--bg-panel); padding: 15px; border-radius: 4px; margin-top: 15px; border-left: 4px solid #4285F4;">
                     <h5 style="margin-bottom: 10px; font-size: 1rem; color: #4285F4;">💡 Hints voor de Speler (Optioneel)</h5>
-                    
                     <div class="form-group">
                         <label>Hint 1 (Getoond bij 1e foute gok)</label>
                         <input type="text" id="hint-1" placeholder="Kleine tip...">
                     </div>
-
                     <div class="form-group" style="margin-top: 15px;">
                         <label>Hint 2 (Getoond bij 2e foute gok)</label>
                         <input type="text" id="hint-2" placeholder="Grote tip...">
@@ -298,21 +300,21 @@
 
                 <p id="publish-message" style="color: var(--warning); font-size: 0.9rem; margin-bottom: 10px;"></p>
 
-                <div style="margin-top: 20px; text-align: right;">
-                    <button type="button" class="btn" style="background-color: #555; margin-right: 10px;" onclick="saveDraft()">💾 Lokaal Opslaan</button>
+                <div style="margin-top: 20px; text-align: right; display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn" id="btn-cancel-edit" style="background-color: #555; display: none;" onclick="cancelEditMode()">Annuleren</button>
+                    <button type="button" class="btn" style="background-color: #555;" onclick="saveDraft()">💾 Lokaal Opslaan</button>
                     <button type="button" class="btn" id="btn-publish-puzzle" style="background-color: var(--success);">🚀 Publiceer Puzzel</button>
                 </div>
             </form>
         </div>
 
-        <!-- TAB 3: Mijn Creaties -->
         <div id="tab-stats" class="tab-panel">
             <h3>Mijn Administratie & Creaties</h3>
-            <p style="margin-bottom: 20px; color: #aaa;">Beheer hier al je kamers, scores en actieve ontwerpers-credits.</p>
+            <p style="margin-bottom: 20px; color: #aaa;">Beheer hier al je unieke puzzels, likes en actieve ontwerpers-credits.</p>
             
             <div class="stats-grid">
                 <div class="stat-card" style="border-color: #4285F4;">
-                    <h4>Actieve Puzzels</h4>
+                    <h4>Unieke Puzzels</h4>
                     <p id="stat-total-puzzles">0</p>
                 </div>
                 <div class="stat-card" style="border-color: gold;">
@@ -328,9 +330,9 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Puzzelnaam (Admin)</th>
+                        <th>Puzzelnaam</th>
                         <th style="text-align: center;">Likes 👍</th>
-                        <th style="text-align: center;">Actie</th>
+                        <th style="text-align: center;">Acties</th>
                     </tr>
                 </thead>
                 <tbody id="designer-puzzles-table">
@@ -349,6 +351,15 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUserId = null;
+        let uniqueDesignerPuzzles = [];
+
+        const qInput = document.getElementById('draft-question');
+        const sInput = document.getElementById('draft-answer');
+        const qCount = document.getElementById('qCount');
+        const sCount = document.getElementById('sCount');
+
+        qInput.addEventListener('input', () => { qCount.textContent = `${qInput.value.length} / 300`; });
+        sInput.addEventListener('input', () => { sCount.textContent = `${sInput.value.length} / 100`; });
 
         function toggleAuthView(view) {
             document.getElementById('auth-message-login').textContent = '';
@@ -442,22 +453,38 @@
             const likesElem = document.getElementById('stat-total-likes');
 
             if (puzzles && puzzles.length > 0) {
-                countElem.textContent = puzzles.length;
+                const uniqueMap = new Map();
+                puzzles.forEach(p => {
+                    let cleanName = (p.puzzle_name || 'New Puzzle').replace(' (Target)', '');
+                    if (!uniqueMap.has(cleanName)) {
+                        uniqueMap.set(cleanName, { ...p, puzzle_name: cleanName, likes: p.likes || 0 });
+                    } else {
+                        let existing = uniqueMap.get(cleanName);
+                        existing.likes += (p.likes || 0);
+                    }
+                });
+
+                uniqueDesignerPuzzles = Array.from(uniqueMap.values());
+                countElem.textContent = uniqueDesignerPuzzles.length;
                 let totalLikes = 0;
                 tableBody.innerHTML = '';
 
-                puzzles.forEach(p => {
-                    totalLikes += (p.likes || 0);
+                uniqueDesignerPuzzles.forEach(p => {
+                    totalLikes += p.likes;
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${p.puzzle_name || 'Naamloze Puzzel'}</td>
-                        <td style="text-align: center; color: var(--success); font-weight: bold;">${p.likes || 0} 👍</td>
-                        <td style="text-align: center;"><button class="btn" style="padding: 5px 10px; margin: 0;">Edit</button></td>
+                        <td>${escapeHtml(p.puzzle_name)}</td>
+                        <td style="text-align: center; color: var(--success); font-weight: bold;">${p.likes} 👍</td>
+                        <td style="text-align: center;">
+                            <button class="btn" style="padding: 5px 10px; margin: 0 5px 0 0; background-color: var(--primary);" onclick="prepareEditPuzzle('${escapeHtml(p.puzzle_name)}')">Edit</button>
+                            <button class="btn" style="padding: 5px 10px; margin: 0; background-color: var(--danger);" onclick="deletePuzzleByName('${escapeHtml(p.puzzle_name)}')">Delete</button>
+                        </td>
                     `;
                     tableBody.appendChild(row);
                 });
                 likesElem.textContent = totalLikes;
             } else {
+                uniqueDesignerPuzzles = [];
                 countElem.textContent = '0';
                 likesElem.textContent = '0';
                 tableBody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #888;">Nog geen puzzels gevonden. Maak er een aan bij 'Nieuwe Puzzel'!</td></tr>`;
@@ -477,64 +504,291 @@
 
         supabaseClient.auth.onAuthStateChange((event, session) => { updateUI(session); });
 
-        // PUZZEL PUBLICEREN NAAR SUPABASE
+        function prepareEditPuzzle(puzzleName) {
+            const puzzle = uniqueDesignerPuzzles.find(p => p.puzzle_name === puzzleName);
+            if (!puzzle) return;
+
+            document.getElementById('edit-puzzle-id').value = puzzle.id;
+            document.getElementById('puzzle-name').value = puzzle.puzzle_name;
+            document.getElementById('draft-question').value = puzzle.question || '';
+            document.getElementById('draft-answer').value = puzzle.answer || '';
+            document.getElementById('puzzle-timer').value = puzzle.google_timer || 0;
+            document.getElementById('puzzle-points').value = puzzle.max_reward || 30;
+            document.getElementById('puzzle-chicken').value = puzzle.chicken_penalty || 0;
+            document.getElementById('puzzle-penalty').value = puzzle.wrong_penalty || 10;
+            document.getElementById('hint-1').value = puzzle.hint_1 || '';
+            document.getElementById('hint-2').value = puzzle.hint_2 || '';
+            document.getElementById('reveal-answer-optie').value = puzzle.reveal_answer || 'free_answer';
+
+            qCount.textContent = `${(puzzle.question || '').length} / 300`;
+            sCount.textContent = `${(puzzle.answer || '').length} / 100`;
+
+            document.getElementById('form-title').textContent = "Puzzel Bewerken";
+            document.getElementById('btn-publish-puzzle').textContent = "💾 Wijzigingen Opslaan";
+            document.getElementById('btn-cancel-edit').style.display = 'inline-block';
+
+            openTab('tab-create');
+        }
+
+        function cancelEditMode() {
+            document.getElementById('puzzle-form').reset();
+            document.getElementById('edit-puzzle-id').value = '';
+            document.getElementById('form-title').textContent = "Nieuwe Puzzel / Kamer Ontwerpen";
+            document.getElementById('btn-publish-puzzle').textContent = "🚀 Publiceer Puzzel";
+            document.getElementById('btn-cancel-edit').style.display = 'none';
+            document.getElementById('publish-message').textContent = '';
+            qCount.textContent = "0 / 300";
+            sCount.textContent = "0 / 100";
+            openTab('tab-stats');
+        }
+
+        // VERWIJDEREN OP BASIS VAN PUZZELNAAM (beide deuren)
+        async function deletePuzzleByName(puzzleName) {
+            if (!confirm(`Weet je zeker dat je puzzel "${puzzleName}" (beide deuren) wilt verwijderen?`)) return;
+
+            // Verwijder zowel de originele als de (Target) variant uit de database
+            const { error } = await supabaseClient
+                .from('Puzzle_Labyrinth')
+                .delete()
+                .eq('designer_id', currentUserId)
+                .in('puzzle_name', [puzzleName, puzzleName + ' (Target)']);
+
+            if (error) {
+                alert("Fout bij verwijderen: " + error.message);
+            } else {
+                alert("Puzzel succesvol verwijderd uit het labyrint!");
+                loadDesignerPuzzles(currentUserId);
+            }
+        }
+
+        function getOppositeWall(wall) {
+            switch (wall) {
+                case 'north': return 'south';
+                case 'south': return 'north';
+                case 'east': return 'west';
+                case 'west': return 'east';
+                default: return null;
+            }
+        }
+
+        function getOffset(wall) {
+            switch (wall) {
+                case 'north': return { x: 0, y: 1 };
+                case 'south': return { x: 0, y: -1 };
+                case 'east':  return { x: 1, y: 0 };
+                case 'west':  return { x: -1, y: 0 };
+                default: return { x: 0, y: 0 };
+            }
+        }
+
+        // PUBLICEREN OF BIJWERKEN
         document.getElementById('btn-publish-puzzle').addEventListener('click', async () => {
             const msgBox = document.getElementById('publish-message');
-            msgBox.textContent = "Puzzel publiceren...";
-            msgBox.style.color = "var(--warning)";
-
-            if (!currentUserId) {
-                msgBox.textContent = "Je bent niet ingelogd!";
-                return;
-            }
-
-            const puzzleName = document.getElementById('puzzle-name').value.trim();
+            const editId = document.getElementById('edit-puzzle-id').value;
+            
+            const puzzleName = document.getElementById('puzzle-name').value.trim() || 'New Puzzle';
             const question = document.getElementById('draft-question').value.trim();
             const answer = document.getElementById('draft-answer').value.trim();
-            const timer = parseInt(document.getElementById('puzzle-timer').value) || 15;
-            const points = parseInt(document.getElementById('puzzle-points').value) || 30;
-            const chicken = parseInt(document.getElementById('puzzle-chicken').value) || 50;
-            const penalty = parseInt(document.getElementById('puzzle-penalty').value) || 10;
+const timer = Math.max(0, parseInt(document.getElementById('puzzle-timer').value) || 0);
+const points = Math.max(1, parseInt(document.getElementById('puzzle-points').value) || 30);
+const chicken = Math.max(0, parseInt(document.getElementById('puzzle-chicken').value) || 0);
+const penalty = Math.max(0, parseInt(document.getElementById('puzzle-penalty').value) || 10);
             const hint1 = document.getElementById('hint-1').value.trim();
             const hint2 = document.getElementById('hint-2').value.trim();
             const revealAnswer = document.getElementById('reveal-answer-optie').value;
 
-            if (!puzzleName || !question || !answer) {
-                msgBox.textContent = "Vul minimaal de puzzelnaam, vraag en het correcte antwoord in!";
+            if (!question || !answer) {
+                msgBox.style.color = "var(--accent)";
+                msgBox.textContent = "Vul minimaal de vraag en het correcte antwoord in!";
                 return;
+            }
+
+            if (!currentUserId) {
+                msgBox.style.color = "var(--accent)";
+                msgBox.textContent = "Je bent niet ingelogd!";
+                return;
+            }
+
+            // BEWERKEN VAN BESTAANDE PUZZEL
+            if (editId) {
+                msgBox.textContent = "Wijzigingen opslaan...";
+                msgBox.style.color = "var(--warning)";
+
+                // Haal eerst de oude naam op om ook de target te kunnen updaten
+                const oldPuzzle = uniqueDesignerPuzzles.find(p => p.id == editId);
+                const oldName = oldPuzzle ? oldPuzzle.puzzle_name : puzzleName;
+
+                // Update alle rijen die horen bij deze puzzelnaam voor deze designer
+                const { error: updateError } = await supabaseClient
+                    .from('Puzzle_Labyrinth')
+                    .update({
+                        puzzle_name: puzzleName,
+                        question: question,
+                        answer: answer,
+                        google_timer: timer,
+                        max_reward: points,
+                        chicken_penalty: chicken,
+                        wrong_penalty: penalty,
+                        hint_1: hint1 || null,
+                        hint_2: hint2 || null,
+                        reveal_answer: revealAnswer
+                    })
+                    .eq('designer_id', currentUserId)
+                    .eq('puzzle_name', oldName);
+
+                // Update ook de target rijen
+                await supabaseClient
+                    .from('Puzzle_Labyrinth')
+                    .update({
+                        puzzle_name: puzzleName + ' (Target)',
+                        question: question,
+                        answer: answer,
+                        google_timer: timer,
+                        max_reward: points,
+                        chicken_penalty: chicken,
+                        wrong_penalty: penalty,
+                        hint_1: hint1 || null,
+                        hint_2: hint2 || null,
+                        reveal_answer: revealAnswer
+                    })
+                    .eq('designer_id', currentUserId)
+                    .eq('puzzle_name', oldName + ' (Target)');
+
+                if (updateError) {
+                    msgBox.style.color = "var(--accent)";
+                    msgBox.textContent = "Fout bij bijwerken: " + updateError.message;
+                } else {
+                    msgBox.style.color = "var(--success)";
+                    msgBox.textContent = "✨ Puzzel succesvol bijgewerkt!";
+                    cancelEditMode();
+                    loadDesignerPuzzles(currentUserId);
+                }
+                return;
+            }
+
+            // NIEUWE PUZZEL PUBLICEREN
+            msgBox.textContent = "Labyrint analyseren en puzzel publiceren...";
+            msgBox.style.color = "var(--warning)";
+
+            const directions = ['north', 'south', 'east', 'west'];
+
+            let { data: existingPuzzles, error: fetchError } = await supabaseClient
+                .from('Puzzle_Labyrinth')
+                .select('room_id, wall_side, pos_x, pos_y');
+
+            if (fetchError) {
+                msgBox.style.color = "var(--accent)";
+                msgBox.textContent = "Fout bij ophalen labyrinth: " + fetchError.message;
+                return;
+            }
+
+            let selectedRoomId, selectedWall, currentRoomCoord, targetX, targetY, targetRoomId, oppositeWall;
+
+            if (!existingPuzzles || existingPuzzles.length === 0) {
+                selectedRoomId = 1;
+                selectedWall = 'south';
+                currentRoomCoord = { x: 0, y: 0 };
+                oppositeWall = getOppositeWall(selectedWall);
+                let offset = getOffset(selectedWall);
+                targetX = offset.x;
+                targetY = offset.y;
+                targetRoomId = 2;
+            } else {
+                let roomIds = [...new Set(existingPuzzles.map(p => p.room_id))];
+                let attempts = 0;
+
+                while (!selectedRoomId && attempts < 100) {
+                    attempts++;
+                    let candidateRoomId = roomIds[Math.floor(Math.random() * roomIds.length)];
+                    let roomRecord = existingPuzzles.find(p => p.room_id === candidateRoomId);
+                    if (!roomRecord || roomRecord.pos_x === null || roomRecord.pos_y === null) continue;
+
+                    let occupiedWalls = existingPuzzles
+                        .filter(p => p.room_id === candidateRoomId)
+                        .map(p => p.wall_side);
+
+                    let freeWalls = directions.filter(dir => !occupiedWalls.includes(dir));
+
+                    if (freeWalls.length > 0) {
+                        selectedRoomId = candidateRoomId;
+                        currentRoomCoord = { x: roomRecord.pos_x, y: roomRecord.pos_y };
+                        selectedWall = freeWalls[Math.floor(Math.random() * freeWalls.length)];
+                    }
+                }
+
+                if (!selectedRoomId || !selectedWall) {
+                    msgBox.style.color = "var(--accent)";
+                    msgBox.textContent = "Geen vrije muren meer beschikbaar in het labyrint!";
+                    return;
+                }
+
+                oppositeWall = getOppositeWall(selectedWall);
+                let offset = getOffset(selectedWall);
+                targetX = currentRoomCoord.x + offset.x;
+                targetY = currentRoomCoord.y + offset.y;
+
+                let existingTargetRoom = existingPuzzles.find(p => p.pos_x === targetX && p.pos_y === targetY);
+                if (existingTargetRoom) {
+                    targetRoomId = existingTargetRoom.room_id;
+                } else {
+                    targetRoomId = Math.max(...roomIds, 0) + 1;
+                }
             }
 
             const { error: insertError } = await supabaseClient
                 .from('Puzzle_Labyrinth')
-                .insert([{
-                    designer_id: currentUserId,
-                    puzzle_name: puzzleName,
-                    question: question,
-                    answer: answer,
-                    google_timer: timer,
-                    max_reward: points,
-                    chicken_penalty: chicken,
-                    wrong_penalty: penalty,
-                    hint_1: hint1 || null,
-                    hint_2: hint2 || null,
-                    reveal_answer: revealAnswer,
-                    likes: 0
-                }]);
+                .insert([
+                    {
+                        designer_id: currentUserId,
+                        puzzle_name: puzzleName,
+                        question: question,
+                        answer: answer,
+                        google_timer: timer,
+                        max_reward: points,
+                        chicken_penalty: chicken,
+                        wrong_penalty: penalty,
+                        hint_1: hint1 || null,
+                        hint_2: hint2 || null,
+                        reveal_answer: revealAnswer,
+                        likes: 0,
+                        room_id: selectedRoomId,
+                        wall_side: selectedWall,
+                        pos_x: currentRoomCoord.x,
+                        pos_y: currentRoomCoord.y
+                    },
+                    {
+                        designer_id: currentUserId,
+                        puzzle_name: puzzleName + ' (Target)',
+                        question: question,
+                        answer: answer,
+                        google_timer: timer,
+                        max_reward: points,
+                        chicken_penalty: chicken,
+                        wrong_penalty: penalty,
+                        hint_1: hint1 || null,
+                        hint_2: hint2 || null,
+                        reveal_answer: revealAnswer,
+                        likes: 0,
+                        room_id: targetRoomId,
+                        wall_side: oppositeWall,
+                        pos_x: targetX,
+                        pos_y: targetY
+                    }
+                ]);
 
             if (insertError) {
                 msgBox.style.color = "var(--accent)";
                 msgBox.textContent = "Fout bij publiceren: " + insertError.message;
             } else {
                 msgBox.style.color = "var(--success)";
-                msgBox.textContent = "🚀 Puzzel succesvol gepubliceerd in de Dungeon!";
-                // Formulier legen
+                msgBox.textContent = `🚀 Puzzel succesvol geplaatst tussen Kamer ${selectedRoomId} en ${targetRoomId}!`;
                 document.getElementById('puzzle-form').reset();
-                // Herlaad de overzichtstabel
+                qCount.textContent = "0 / 300";
+                sCount.textContent = "0 / 100";
                 loadDesignerPuzzles(currentUserId);
             }
         });
 
-        // AVATAR URL OPSLAAN
         document.getElementById('btn-save-avatar').addEventListener('click', async () => {
             const avatarUrl = document.getElementById('profile-avatar-url').value.trim();
             const msg = document.getElementById('avatar-save-msg');
@@ -558,7 +812,6 @@
             }
         });
 
-        // REGISTREREN VIA EMAIL
         document.getElementById('btn-register-submit').addEventListener('click', async () => {
             const msgBox = document.getElementById('auth-message-reg');
             msgBox.textContent = "Controleren of gebruikersnaam beschikbaar is...";
@@ -605,18 +858,16 @@
                     ]);
                     
                     if(dbError) {
-                        console.error("Profiel opslaan mislukte:", dbError);
                         msgBox.style.color = "var(--accent)";
                         msgBox.textContent = "Fout bij opslaan profiel: " + dbError.message;
                         return;
                     }
                 }
                 msgBox.style.color = "var(--success)"; 
-                msgBox.textContent = "Registratie succesvol! Controleer je e-mail om de registratie te bevestigen. Check ook je spam folder."; 
+                msgBox.textContent = "Registratie succesvol! Controleer je e-mail om de registratie te bevestigen."; 
             }
         });
 
-        // GOOGLE-GEBRUIKERSNAAM OPSLAAN
         document.getElementById('btn-save-google-username').addEventListener('click', async () => {
             const msgBox = document.getElementById('auth-message-google');
             const username = document.getElementById('google-reg-username').value.trim();
@@ -651,7 +902,6 @@
             }
         });
 
-        // INLOGGEN MET EMAIL
         document.getElementById('btn-login').addEventListener('click', async () => {
             const msgBox = document.getElementById('auth-message-login');
             msgBox.textContent = "Inloggen...";
@@ -664,33 +914,35 @@
             if (error) { msgBox.textContent = "Fout bij inloggen: " + error.message; }
         });
 
-        // GOOGLE INLOGGEN
         document.getElementById('btn-google').addEventListener('click', async () => {
-            const { data, error } = await supabaseClient.auth.signInWithOAuth({ 
+            await supabaseClient.auth.signInWithOAuth({ 
                 provider: 'google',
                 options: {
                     redirectTo: 'https://bg-nttw-2025.github.io/Dungeon_Submit_Puzzle/'
                 }
             });
-            if (error) { document.getElementById('auth-message-login').textContent = "Google Login Fout: " + error.message; }
         });
 
-        // UITLOGGEN
         document.getElementById('btn-logout').addEventListener('click', async () => {
             await supabaseClient.auth.signOut();
         });
 
-        // TABBLADEN WISSELEN
-        function openTab(tabId) {
+function openTab(tabId) {
             document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             
-            if (typeof event !== 'undefined' && event && event.currentTarget) {
-                event.currentTarget.classList.add('active');
+            const activeBtn = document.querySelector(`button[onclick*="${tabId}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+
+        // Specifieke functie als je op 'Nieuwe Puzzel' in het menu klikt
+        function clickNieuwePuzzelMenu() {
+            // Als we nog in bewerk-modus zaten, reset het formulier eerst volledig
+            if (document.getElementById('edit-puzzle-id').value !== '') {
+                cancelEditMode();
             } else {
-                const activeBtn = document.querySelector(`button[onclick*="${tabId}"]`);
-                if (activeBtn) activeBtn.classList.add('active');
+                openTab('tab-create');
             }
         }
 
@@ -703,6 +955,10 @@
             const questionText = document.getElementById('draft-question').value;
             localStorage.setItem('draft_puzzle_question', questionText);
             alert('Concept lokaal opgeslagen!');
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
     </script>
 </body>
