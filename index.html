@@ -581,50 +581,55 @@
             openTab('tab-stats');
         }
 
-        // PUNT 5: Puzzel verwijderen en direct omzetten naar een open doorgang (geen muur/opsluiting)
-        async function deletePuzzleByName(puzzleName) {
-            if (!confirm(`Weet je zeker dat je puzzel "${puzzleName}" wilt verwijderen? De deuren worden direct omgezet in open doorgangen zodat spelers niet opgesloten raken.`)) return;
+// PUNT 5: Puzzel opheffen, record behouden in Supabase en omzetten naar een open doorgang
+async function deletePuzzleByName(puzzleName) {
+    if (!confirm(`Weet je zeker dat je puzzel "${puzzleName}" wilt verwijderen? De puzzel verdwijnt en de doorgang wordt permanent opengezet voor spelers.`)) return;
 
-            // 1. Haal eerst de records op die bij deze puzzel horen om te weten welke kamers/muren het betreft
-            const { data: targetPuzzles, error: fetchError } = await supabaseClient
+    // 1. Zoek de rijen op die bij deze puzzel horen (zowel de start als de target kant)
+    const { data: targetPuzzles, error: fetchError } = await supabaseClient
+        .from('Puzzle_Labyrinth')
+        .select('id')
+        .eq('designer_id', currentUserId)
+        .in('puzzle_name', [puzzleName, puzzleName + ' (Target)']);
+
+    if (fetchError) {
+        alert("Fout bij ophalen puzzelgegevens: " + fetchError.message);
+        return;
+    }
+
+    if (targetPuzzles && targetPuzzles.length > 0) {
+        // 2. UPDATE de bestaande records in plaats van ze te wissen!
+        // Zo blijft de doorgang netjes bestaan in het labyrint voor de spelers.
+        for (let p of targetPuzzles) {
+            const { error: updateError } = await supabaseClient
                 .from('Puzzle_Labyrinth')
-                .select('*')
-                .eq('designer_id', currentUserId)
-                .in('puzzle_name', [puzzleName, puzzleName + ' (Target)']);
+                .update({
+                    puzzle_name: null,
+                    question: null,
+                    answer: null,
+                    google_timer: 0,
+                    max_reward: 0,
+                    chicken_penalty: 0,
+                    wrong_penalty: 0,
+                    hint_1: null,
+                    hint_2: null,
+                    reveal_answer: 'free_answer',
+                    credits_cost: 0,
+                    likes: 0,
+                    dislikes: 0,
+                    is_open: true // Deur blijft bestaan, maar is nu open!
+                })
+                .eq('id', p.id);
 
-            if (fetchError) {
-                alert("Fout bij ophalen puzzelgegevens: " + fetchError.message);
-                return;
+            if (updateError) {
+                console.error("Fout bij openzetten doorgang ID " + p.id, updateError.message);
             }
-
-            if (targetPuzzles && targetPuzzles.length > 0) {
-                // 2. Zet voor elke gevonden deur de puzzel-data op NULL en markeer als open doorgang
-                for (let p of targetPuzzles) {
-                    await supabaseClient
-                        .from('Puzzle_Labyrinth')
-                        .update({
-                            puzzle_name: null,
-                            question: null,
-                            answer: null,
-                            google_timer: 0,
-                            max_reward: 0,
-                            chicken_penalty: 0,
-                            wrong_penalty: 0,
-                            hint_1: null,
-                            hint_2: null,
-                            reveal_answer: 'free_answer',
-                            credits_cost: 0,
-                            likes: 0,
-                            dislikes: 0,
-                            is_open: true // Optioneel veld om aan te geven dat deze doorgang open is
-                        })
-                        .eq('id', p.id);
-                }
-            }
-
-            alert("Puzzel is verwijderd en de doorgangen zijn opengezet voor spelers!");
-            loadDesignerPuzzles(currentUserId);
         }
+    }
+
+    alert("Puzzel is verwijderd en de doorgang is opengezet in het labyrint!");
+    loadDesignerPuzzles(currentUserId);
+}
 
         function getOppositeWall(wall) {
             switch (wall) {
