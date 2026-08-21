@@ -930,33 +930,24 @@ async function deletePuzzleByName(puzzleName) {
 
             msgBox.textContent = "Account aanmaken...";
 
-            const { data, error } = await supabaseClient.auth.signUp({ 
-                email: email, 
-                password: password,
-                options: {
-                    emailRedirectTo: 'https://bg-nttw-2025.github.io/Dungeon_Submit_Puzzle/'
-                }
-            });
-            
-            if (error) { 
-                msgBox.style.color = "var(--accent)";
-                msgBox.textContent = "Fout: " + error.message; 
-            } else { 
-                if(data.user) {
-                    const { error: dbError } = await supabaseClient.from('designers').insert([
-                        { id: data.user.id, username: username }
-                    ]);
-                    
-                    if(dbError) {
-                        msgBox.style.color = "var(--accent)";
-                        msgBox.textContent = "Fout bij opslaan profiel: " + dbError.message;
-                        return;
-                    }
-                }
-                msgBox.style.color = "var(--success)"; 
-                msgBox.textContent = "Registratie succesvol! Controleer je e-mail om de registratie te bevestigen."; 
-            }
-        });
+			const { data, error } = await supabaseClient.auth.signUp({ 
+    email: email, 
+    password: password,
+    options: {
+        data: {
+            name: username // Geef de gebruikersnaam mee aan de trigger!
+        },
+        emailRedirectTo: 'https://bg-nttw-2025.github.io/Dungeon_Submit_Puzzle/'
+    }
+});
+
+if (error) { 
+    msgBox.style.color = "var(--accent)";
+    msgBox.textContent = "Fout: " + error.message; 
+} else { 
+    msgBox.style.color = "var(--success)"; 
+    msgBox.textContent = "Registratie succesvol! Controleer je e-mail om de registratie te bevestigen."; 
+}
 
         document.getElementById('btn-save-google-username').addEventListener('click', async () => {
             const msgBox = document.getElementById('auth-message-google');
