@@ -607,6 +607,9 @@ async function deletePuzzleByName(puzzleName) {
                 .from('Puzzle_Labyrinth')
                 .update({
                     puzzle_name: null,
+					created_at: null,
+					disigner_id: null,
+					designer_name: 'Labyrinth System',
                     question: null,
                     answer: null,
                     google_timer: 0,
