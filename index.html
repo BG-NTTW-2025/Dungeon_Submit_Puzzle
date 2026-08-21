@@ -930,7 +930,7 @@ async function deletePuzzleByName(puzzleName) {
 
             msgBox.textContent = "Account aanmaken...";
 
-			const { data, error } = await supabaseClient.auth.signUp({ 
+const { data, error } = await supabaseClient.auth.signUp({ 
     email: email, 
     password: password,
     options: {
@@ -948,6 +948,7 @@ if (error) {
     msgBox.style.color = "var(--success)"; 
     msgBox.textContent = "Registratie succesvol! Controleer je e-mail om de registratie te bevestigen."; 
 }
+        });
 
         document.getElementById('btn-save-google-username').addEventListener('click', async () => {
             const msgBox = document.getElementById('auth-message-google');
