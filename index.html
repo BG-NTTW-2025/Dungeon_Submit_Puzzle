@@ -460,13 +460,13 @@
             }
         }
 
-				async function loadDesignerPuzzles(designerId) {
-				const { data: puzzles, error } = await supabaseClient
-				.from('Puzzle_Labyrinth')
-				.select('*')
-				.eq('designer_id', designerId)
-				.eq('is_open', false)          // Filter open doorgangen eruit
-				.not('puzzle_name', 'is', null); // Filter rijen waar de naam leeg/null is eruit
+async function loadDesignerPuzzles(designerId) {
+            const { data: puzzles, error } = await supabaseClient
+                .from('Puzzle_Labyrinth')
+                .select('*')
+                .eq('designer_id', designerId)
+                .eq('is_open', false)          
+                .not('puzzle_name', 'is', null); 
 
             const tableBody = document.getElementById('designer-puzzles-table');
             const countElem = document.getElementById('stat-total-puzzles');
@@ -501,19 +501,45 @@
                     totalLikes += p.likes;
                     totalDislikes += p.dislikes || 0;
                     const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${escapeHtml(p.puzzle_name)}</td>
-                        <td style="text-align: center;">
-                            <span style="color: var(--success); font-weight: bold;"><img src="like_green_symb.png" class="tab-icon" alt=""> ${p.likes}</span> <br>
-                            <span style="color: var(--danger); font-weight: bold;"><img src="disLike_red_symb.png" class="tab-icon" alt=""> ${p.dislikes || 0}</span>
-                        </td>
-                        <td style="text-align: center;">
-                            <button class="btn" style="padding: 5px 10px; margin: 0 5px 0 0; background-color: var(--primary);" onclick="prepareEditPuzzle('${escapeHtml(p.puzzle_name)}')">Edit</button>
-                            <br><br><button class="btn" style="padding: 5px 10px; margin: 0; background-color: var(--danger);" onclick="deletePuzzleByName('${escapeHtml(p.puzzle_name)}')">Delete</button>
-                        </td>
+                    
+                    // We maken veilige knoppen aan via DOM-elementen in plaats van gevaarlijke inline HTML strings
+                    const nameCell = document.createElement('td');
+                    nameCell.textContent = p.puzzle_name;
+
+                    const statsCell = document.createElement('td');
+                    statsCell.style.textAlign = 'center';
+                    statsCell.innerHTML = `
+                        <span style="color: var(--success); font-weight: bold;"><img src="like_green_symb.png" class="tab-icon" alt=""> ${p.likes}</span> <br>
+                        <span style="color: var(--danger); font-weight: bold;"><img src="disLike_red_symb.png" class="tab-icon" alt=""> ${p.dislikes || 0}</span>
                     `;
+
+                    const actionsCell = document.createElement('td');
+                    actionsCell.style.textAlign = 'center';
+
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'btn';
+                    editBtn.style.cssText = 'padding: 5px 10px; margin: 0 5px 0 0; background-color: var(--primary);';
+                    editBtn.textContent = 'Edit';
+                    editBtn.onclick = () => prepareEditPuzzle(p.puzzle_name);
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'btn';
+                    deleteBtn.style.cssText = 'padding: 5px 10px; margin: 0; background-color: var(--danger);';
+                    deleteBtn.textContent = 'Delete';
+                    deleteBtn.onclick = () => deletePuzzleByName(p.puzzle_name);
+
+                    actionsCell.appendChild(editBtn);
+                    actionsCell.appendChild(document.createElement('br'));
+                    actionsCell.appendChild(document.createElement('br'));
+                    actionsCell.appendChild(deleteBtn);
+
+                    row.appendChild(nameCell);
+                    row.appendChild(statsCell);
+                    row.appendChild(actionsCell);
+
                     tableBody.appendChild(row);
                 });
+
                 likesElem.innerHTML = `<img src="like_green_symb.png" class="tab-icon" alt=""> ${totalLikes}`;
                 dislikesElem.innerHTML = `<img src="disLike_red_symb.png" class="tab-icon" alt=""> ${totalDislikes}`;
             } else {
