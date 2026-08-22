@@ -191,7 +191,7 @@
                             <label style="font-size: 0.9rem;">Avatar Afbeeldings-URL</label>
                             <div style="display: flex; gap: 10px;">
                                 <input type="text" id="profile-avatar-url" placeholder="https://voorbeeld.nl/mijn-avatar.png">
-                                <button class="btn" id="btn-save-avatar" style="margin: 0; padding: 10px 15px;">Opslaan</button>
+                                <button class="btn" id="btn-save-avatar" style="margin: 0; padding: 10px 15px;">Save</button>
                             </div>
                             <p id="avatar-save-msg" style="font-size: 0.8rem; margin-top: 5px;"></p>
                         </div>
@@ -199,11 +199,11 @@
                         <div id="password-settings" class="password-section">
                             <h4 style="margin-bottom: 15px;">Password Wijzigen</h4>
                             <div class="form-group"><input type="password" placeholder="New Password"></div>
-                            <button class="btn" style="background-color: var(--warning); width: 100%;">Opslaan</button>
+                            <button class="btn" style="background-color: var(--warning); width: 100%;">Save</button>
                         </div>
                         
                         <br>
-                        <button class="btn" id="btn-logout" style="background-color: #ff3333; width: 100%;">Uitloggen</button>
+                        <button class="btn" id="btn-logout" style="background-color: #ff3333; width: 100%;">Log out</button>
                     </div>
 
                     <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--primary); text-align: center;">
@@ -560,8 +560,8 @@
             qCount.textContent = `${(puzzle.question || '').length} / 300`;
             sCount.textContent = `${(puzzle.answer || '').length} / 100`;
 
-            document.getElementById('form-title').textContent = "Puzzel Bewerken";
-            document.getElementById('btn-publish-puzzle').innerHTML = '<img src="publish_symb.png" class="tab-icon" alt=""> Wijzigingen Opslaan';
+            document.getElementById('form-title').textContent = "Edit Puzzle";
+            document.getElementById('btn-publish-puzzle').innerHTML = '<img src="publish_symb.png" class="tab-icon" alt=""> Save Changes';
             document.getElementById('btn-cancel-edit').style.display = 'inline-block';
 
             openTab('tab-create');
@@ -570,7 +570,7 @@
         function cancelEditMode() {
             document.getElementById('puzzle-form').reset();
             document.getElementById('edit-puzzle-id').value = '';
-            document.getElementById('form-title').textContent = "Nieuwe Puzzel / Kamer Ontwerpen";
+            document.getElementById('form-title').textContent = "New Puzzle / Room Design";
             document.getElementById('btn-publish-puzzle').innerHTML = '<img src="publish_symb.png" class="tab-icon" alt=""> Publiceer Puzzel';
             document.getElementById('btn-cancel-edit').style.display = 'none';
             document.getElementById('publish-message').textContent = '';
@@ -582,7 +582,7 @@
 
 // PUNT 5: Puzzel opheffen, record behouden in Supabase en omzetten naar een open doorgang
 async function deletePuzzleByName(puzzleName) {
-    if (!confirm(`Weet je zeker dat je puzzel "${puzzleName}" wilt verwijderen? De puzzel verdwijnt en de doorgang wordt permanent opengezet voor spelers.`)) return;
+    if (!confirm(`Are you sure you want to remove the puzzle "${puzzleName}"? The puzzle will disappear, and the passage will be permanently opened for players.`)) return;
 
     // 1. Zoek de rijen op die bij deze puzzel horen (zowel de start als de target kant)
     const { data: targetPuzzles, error: fetchError } = await supabaseClient
@@ -592,7 +592,7 @@ async function deletePuzzleByName(puzzleName) {
         .in('puzzle_name', [puzzleName, puzzleName + ' (Target)']);
 
     if (fetchError) {
-        alert("Fout bij ophalen puzzelgegevens: " + fetchError.message);
+        alert("Error retrieving puzzle data: " + fetchError.message);
         return;
     }
 
@@ -624,12 +624,12 @@ async function deletePuzzleByName(puzzleName) {
                 .eq('id', p.id);
 
             if (updateError) {
-                console.error("Fout bij openzetten doorgang ID " + p.id, updateError.message);
+                console.error("Error opening passage ID " + p.id, updateError.message);
             }
         }
     }
 
-    alert("Puzzel is verwijderd en de doorgang is opengezet in het labyrint!");
+    alert("The puzzle has been removed and the passageway in the labyrinth has been opened!");
     loadDesignerPuzzles(currentUserId);
 }
 
@@ -682,18 +682,18 @@ async function deletePuzzleByName(puzzleName) {
 
             if (!question || !answer) {
                 msgBox.style.color = "var(--accent)";
-                msgBox.textContent = "Vul minimaal de vraag en het correcte antwoord in!";
+                msgBox.textContent = "Enter at least the question and the correct answer!";
                 return;
             }
 
             if (!currentUserId) {
                 msgBox.style.color = "var(--accent)";
-                msgBox.textContent = "Je bent niet ingelogd!";
+                msgBox.textContent = "You are not logged in!";
                 return;
             }
 
             if (editId) {
-                msgBox.textContent = "Wijzigingen opslaan...";
+                msgBox.textContent = "Save Changes...";
                 msgBox.style.color = "var(--warning)";
 
                 const oldPuzzle = uniqueDesignerPuzzles.find(p => p.id == editId);
@@ -737,10 +737,10 @@ async function deletePuzzleByName(puzzleName) {
 
                 if (updateError) {
                     msgBox.style.color = "var(--accent)";
-                    msgBox.textContent = "Fout bij bijwerken: " + updateError.message;
+                    msgBox.textContent = "Error updating: " + updateError.message;
                 } else {
                     msgBox.style.color = "var(--success)";
-                    msgBox.textContent = "✨ Puzzel succesvol bijgewerkt!";
+                    msgBox.textContent = "✨ Puzzle successfully updated!";
                     cancelEditMode();
                     loadDesignerPuzzles(currentUserId);
                 }
@@ -758,7 +758,7 @@ async function deletePuzzleByName(puzzleName) {
 
             if (fetchError) {
                 msgBox.style.color = "var(--accent)";
-                msgBox.textContent = "Fout bij ophalen labyrinth: " + fetchError.message;
+                msgBox.textContent = "Error retrieving labyrinth: " + fetchError.message;
                 return;
             }
 
@@ -798,7 +798,7 @@ async function deletePuzzleByName(puzzleName) {
 
                 if (!selectedRoomId || !selectedWall) {
                     msgBox.style.color = "var(--accent)";
-                    msgBox.textContent = "Geen vrije muren meer beschikbaar in het labyrint!";
+                    msgBox.textContent = "No more free walls available in the labyrinth!";
                     return;
                 }
 
@@ -864,10 +864,10 @@ async function deletePuzzleByName(puzzleName) {
 
             if (insertError) {
                 msgBox.style.color = "var(--accent)";
-                msgBox.textContent = "Fout bij publiceren: " + insertError.message;
+                msgBox.textContent = "Error during publishing: " + insertError.message;
             } else {
                 msgBox.style.color = "var(--success)";
-                msgBox.innerHTML = `<img src="succ_publ_symb.png" style="width:16px; vertical-align:middle; margin-right:4px;" alt=""> Puzzel succesvol geplaatst tussen Kamer ${selectedRoomId} en ${targetRoomId}!`;
+                msgBox.innerHTML = `<img src="succ_publ_symb.png" style="width:16px; vertical-align:middle; margin-right:4px;" alt=""> Puzzle successfully placed between the Chambers${selectedRoomId} and ${targetRoomId}!`;
                 document.getElementById('puzzle-form').reset();
                 togglePaidCreditsInput();
                 qCount.textContent = "0 / 300";
@@ -879,7 +879,7 @@ async function deletePuzzleByName(puzzleName) {
         document.getElementById('btn-save-avatar').addEventListener('click', async () => {
             const avatarUrl = document.getElementById('profile-avatar-url').value.trim();
             const msg = document.getElementById('avatar-save-msg');
-            msg.textContent = "Opslaan...";
+            msg.textContent = "Save...";
             msg.style.color = "var(--warning)";
 
             if (currentUserId) {
@@ -890,7 +890,7 @@ async function deletePuzzleByName(puzzleName) {
 
                 if (error) {
                     msg.style.color = "var(--accent)";
-                    msg.textContent = "Fout bij opslaan: " + error.message;
+                    msg.textContent = "Error saving: " + error.message;
                 } else {
                     msg.style.color = "var(--success)";
                     msg.textContent = "Avatar succesvol bijgewerkt!";
@@ -925,7 +925,7 @@ async function deletePuzzleByName(puzzleName) {
                 msgBox.textContent = "Fout: " + error.message; 
             } else { 
                 msgBox.style.color = "var(--success)"; 
-                msgBox.textContent = "Registratie succesvol! Controleer je e-mail inbox en spam of junk map om de registratie te bevestigen. De afzender is: Supabase Auth"; 
+                msgBox.textContent = "Registration successful! Check your email inbox and spam or junk folder to confirm your registration. The sender is: Supabase Auth"; 
             }
         });
 
@@ -934,7 +934,7 @@ async function deletePuzzleByName(puzzleName) {
             const username = document.getElementById('google-reg-username').value.trim();
 
             if (!username) {
-                msgBox.textContent = "Vul een geldige gebruikersnaam in!";
+                msgBox.textContent = "Enter a valid username!";
                 return;
             }
 
@@ -945,7 +945,7 @@ async function deletePuzzleByName(puzzleName) {
                 .maybeSingle();
 
             if (existingUser) {
-                msgBox.textContent = `De naam "${username}" is al in gebruik!`;
+                msgBox.textContent = `This Name "${username}" is already in use!`;
                 return;
             }
 
@@ -955,7 +955,7 @@ async function deletePuzzleByName(puzzleName) {
                 ]);
 
                 if (dbError) {
-                    msgBox.textContent = "Fout bij opslaan: " + dbError.message;
+                    msgBox.textContent = "Error saving: " + dbError.message;
                 } else {
                     const { data: sessionData } = await supabaseClient.auth.getSession();
                     updateUI(sessionData.session);
@@ -972,7 +972,7 @@ async function deletePuzzleByName(puzzleName) {
             if(!email || !password) { msgBox.textContent = "Enter your email and password!"; return; }
 
             const { data, error } = await supabaseClient.auth.signInWithPassword({ email: email, password: password });
-            if (error) { msgBox.textContent = "Fout bij inloggen: " + error.message; }
+            if (error) { msgBox.textContent = "Login error: " + error.message; }
         });
 
         document.getElementById('btn-google').addEventListener('click', async () => {
