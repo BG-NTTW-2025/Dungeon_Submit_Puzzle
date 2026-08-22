@@ -146,10 +146,7 @@
                     <div id="register-form-view" style="display:none;">
                         <p style="margin-bottom: 15px; font-weight:bold; color: var(--accent);">Nieuw Ontwerpersaccount</p>
                         
-                        <div class="form-group">
-                            <label>Kies een Ontwerpersnaam (Username)*</label>
-                            <input type="text" id="reg-username" placeholder="Bv. dm_master456" required>
-                        </div>
+
                         <div class="form-group">
                             <label>E-mailadres</label>
                             <input type="email" id="reg-email" placeholder="jouw@email.nl">
@@ -907,21 +904,18 @@ async function deletePuzzleByName(puzzleName) {
             msgBox.textContent = "Account aanmaken...";
             msgBox.style.color = "var(--warning)";
             
-            const username = document.getElementById('reg-username').value.trim();
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-password').value;
             
-            if(!username || !email || !password) { 
-                msgBox.textContent = "Vul aub een gebruikersnaam, e-mail en wachtwoord in!"; 
+            if(!email || !password) { 
+                msgBox.textContent = "Vul alstublieft een e-mail en wachtwoord in!"; 
                 return; 
             }
 
-            // Stap 1: Registreer de gebruiker en stuur de gekozen username mee in de metadata
             const { data, error } = await supabaseClient.auth.signUp({ 
                 email: email, 
                 password: password,
                 options: {
-                    data: { username: username }, // Sla de username op in de Auth-metadata
                     emailRedirectTo: 'https://bg-nttw-2025.github.io/Dungeon_Submit_Puzzle/'
                 }
             });
@@ -931,7 +925,7 @@ async function deletePuzzleByName(puzzleName) {
                 msgBox.textContent = "Fout: " + error.message; 
             } else { 
                 msgBox.style.color = "var(--success)"; 
-                msgBox.textContent = "Registratie succesvol! Controleer je e-mail (Inbox en Spam). Na bevestiging wordt je account automatisch geactiveerd."; 
+                msgBox.textContent = "Registratie succesvol! Controleer je e-mail om de registratie te bevestigen."; 
             }
         });
 
