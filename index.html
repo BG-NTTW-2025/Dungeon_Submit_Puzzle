@@ -112,7 +112,7 @@
 
     <div class="sidebar">
         <h2>Puzzle Designer</h2>
-        <button class="tab-button active" onclick="openTab('tab-profile')"><img src="settings_symb.png" class="tab-icon" alt=""> Profiel & Login</button>
+        <button class="tab-button active" onclick="openTab('tab-profile')"><img src="settings_symb.png" class="tab-icon" alt=""> Profile & Login</button>
         <button class="tab-button" onclick="clickNieuwePuzzelMenu()" id="nav-create" style="display:none;"><img src="puzzle_piece_symb.png" class="tab-icon" alt=""> Nieuwe Puzzel</button>
         <button class="tab-button" onclick="openTab('tab-stats')" id="nav-stats" style="display:none;"><img src="my_creation_symb.png" class="tab-icon" alt=""> Mijn Creaties</button>
     </div>
@@ -120,39 +120,39 @@
     <div class="main-content">
 
         <div id="tab-profile" class="tab-panel active">
-            <h3>Account & Instellingen</h3>
+            <h3>Account & Settings</h3>
             <div class="profile-layout">
                 
                 <div class="profile-left">
                     <div id="login-form-view">
-                        <p style="margin-bottom: 15px;">Log in op je ontwerpersaccount:</p>
-                        <button class="btn" id="btn-google" style="background-color: #4285F4; width: 100%; margin-bottom: 20px;">Inloggen met Google</button>
+                        <p style="margin-bottom: 15px;">Log in to your designer account:</p>
+                        <button class="btn" id="btn-google" style="background-color: #4285F4; width: 100%; margin-bottom: 20px;">Log in with Google</button>
                         
                         <hr style="border-color: var(--primary); margin: 20px 0;">
-                        <p style="margin-bottom: 10px;">Of met E-mail & Wachtwoord:</p>
+                        <p style="margin-bottom: 10px;">Or with email & password:</p>
                         
                         <div class="form-group"><input type="email" id="auth-email" placeholder="E-mailadres"></div>
-                        <div class="form-group"><input type="password" id="auth-password" placeholder="Wachtwoord"></div>
+                        <div class="form-group"><input type="password" id="auth-password" placeholder="Password"></div>
                         <p id="auth-message-login" style="color: var(--warning); font-size: 0.9rem; margin-bottom: 10px;"></p>
                         
                         <button class="btn" id="btn-login" style="width: 100%;">Log In</button>
                         
                         <div style="margin-top: 25px; text-align: center;">
-                            <p style="color: #aaa; margin-bottom: 10px;">Nog geen account?</p>
-                            <button class="btn btn-outline" onclick="toggleAuthView('register')" style="width: 100%;">Maak een nieuw account aan</button>
+                            <p style="color: #aaa; margin-bottom: 10px;">Don't have an account yet?</p>
+                            <button class="btn btn-outline" onclick="toggleAuthView('register')" style="width: 100%;">Create a new account</button>
                         </div>
                     </div>
 
                     <div id="register-form-view" style="display:none;">
-                        <p style="margin-bottom: 15px; font-weight:bold; color: var(--accent);">Nieuw Ontwerpersaccount</p>
+                        <p style="margin-bottom: 15px; font-weight:bold; color: var(--accent);">New Designer account</p>
                         
 
                         <div class="form-group">
                             <label>E-mailadres</label>
-                            <input type="email" id="reg-email" placeholder="jouw@email.nl">
+                            <input type="email" id="reg-email" placeholder="your@email.nl">
                         </div>
                         <div class="form-group">
-                            <label>Wachtwoord</label>
+                            <label>Password</label>
                             <input type="password" id="reg-password" placeholder="Minimaal 6 tekens">
                         </div>
                         
@@ -166,25 +166,25 @@
                     </div>
 
                     <div id="google-username-view" style="display:none;">
-                        <p style="margin-bottom: 15px; font-weight:bold; color: var(--accent);">Kies je Ontwerpersnaam</p>
-                        <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 15px;">Je bent ingelogd via Google! Kies nog even een unieke heldennaam voor je profiel:</p>
+                        <p style="margin-bottom: 15px; font-weight:bold; color: var(--accent);">Choose your designer name</p>
+                        <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 15px;">You are logged in via Google! Just pick a unique username for your profile:</p>
                         
                         <div class="form-group">
-                            <label>Ontwerpersnaam (Username)*</label>
+                            <label>Designer's name (Username)*</label>
                             <input type="text" id="google-reg-username" placeholder="Bv. GoogleMaster99">
                         </div>
                         <p id="auth-message-google" style="color: var(--warning); font-size: 0.9rem; margin-bottom: 10px;"></p>
                         
-                        <button class="btn" id="btn-save-google-username" style="width: 100%; background-color: var(--success);">Opslaan & Naar Dashboard</button>
+                        <button class="btn" id="btn-save-google-username" style="width: 100%; background-color: var(--success);">Save & Go to Dashboard</button>
                     </div>
 
                     <div id="profile-section" style="display:none;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                            <p style="font-size: 1.2rem; margin: 0;">Welkom terug, <strong id="display-username" style="color: var(--accent);">Ontwerper</strong>!</p>
-                            <button class="btn-outline" style="padding: 5px 10px; border-radius: 50%; font-size: 1.2rem;" onclick="togglePasswordSection()" title="Instellingen"><img src="settings_symb.png" class="tab-icon" alt=""></button>
+                            <p style="font-size: 1.2rem; margin: 0;">Welcome back, <strong id="display-username" style="color: var(--accent);">Designer</strong>!</p>
+                            <button class="btn-outline" style="padding: 5px 10px; border-radius: 50%; font-size: 1.2rem;" onclick="togglePasswordSection()" title="Settings"><img src="settings_symb.png" class="tab-icon" alt=""></button>
                         </div>
                         
-                        <p style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">Jouw unieke Systeem User ID:</p>
+                        <p style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">Your unique system User ID:</p>
                         <p id="display-user-id" style="font-size: 0.8rem; color: var(--success); background: var(--bg-dark); padding: 8px; border-radius: 4px; word-break: break-all; margin-bottom: 15px; border: 1px solid var(--primary);"></p>
 
                         <div class="form-group" style="margin-top: 15px;">
@@ -197,8 +197,8 @@
                         </div>
 
                         <div id="password-settings" class="password-section">
-                            <h4 style="margin-bottom: 15px;">Wachtwoord Wijzigen</h4>
-                            <div class="form-group"><input type="password" placeholder="Nieuw wachtwoord"></div>
+                            <h4 style="margin-bottom: 15px;">Password Wijzigen</h4>
+                            <div class="form-group"><input type="password" placeholder="New Password"></div>
                             <button class="btn" style="background-color: var(--warning); width: 100%;">Opslaan</button>
                         </div>
                         
@@ -207,13 +207,13 @@
                     </div>
 
                     <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid var(--primary); text-align: center;">
-                        <p style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">Problemen met aanmelden?</p>
-                        <a href="mailto:jaca.eis@gmail.com?subject=Probleem%20Puzzle%20Designer%20Aanmelding" style="font-size: 0.9rem; color: var(--accent); text-decoration: none; font-weight: bold;"><img src="email_symb.png"> Neem contact op met de beheerder</a>
+                        <p style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">Having trouble logging in?</p>
+                        <a href="mailto:jaca.eis@gmail.com?subject=Probleem%20Puzzle%20Designer%20Aanmelding" style="font-size: 0.9rem; color: var(--accent); text-decoration: none; font-weight: bold;"><img src="email_symb.png"> Contact the administrator</a>
                     </div>
                 </div>
 
                 <div class="profile-right">
-                    <h2 style="margin-bottom: 20px;">Jouw Avatar</h2>
+                    <h2 style="margin-bottom: 20px;">Your Avatar</h2>
                     <img id="avatar-img-preview" class="avatar-preview-img" alt="Designer Avatar" onerror="this.style.display='none'; document.getElementById('avatar-svg-placeholder').style.display='block';">
                     <svg id="avatar-svg-placeholder" width="180" height="180" viewBox="0 0 100 100" fill="none" stroke="var(--success)" stroke-width="4">
                         <path d="M50 10 L90 30 L90 70 L50 90 L10 70 L10 30 Z" />
@@ -221,67 +221,67 @@
                         <circle cx="65" cy="45" r="5" fill="var(--success)"/>
                         <path d="M40 65 Q50 75 60 65" stroke-linecap="round"/>
                     </svg>
-                    <p id="avatar-caption-text" style="margin-top: 20px; color: #aaa; font-size: 0.9rem;">Voer links een afbeeldings-URL in om je eigen avatar te tonen.</p>
+                    <p id="avatar-caption-text" style="margin-top: 20px; color: #aaa; font-size: 0.9rem;">Enter an image URL on the left to display your own avatar.</p>
                 </div>
             </div>
         </div>
 
         <div id="tab-create" class="tab-panel">
-            <h3 id="form-title">Nieuwe Puzzel / Kamer Ontwerpen</h3>
+            <h3 id="form-title">New Puzzle / Room Design</h3>
             <form id="puzzle-form">
                 <input type="hidden" id="edit-puzzle-id" value="">
                 
                 <div class="form-group">
-                    <label>Naam Puzzel (unieke identificatie)</label>
+                    <label>Puzzle Name (unique identifier)</label>
                     <input type="text" id="puzzle-name" placeholder="Bv. 'Logica Raadsel 1'">
                 </div>
 
                 <hr style="border-color: var(--primary); margin: 20px 0;">
 
                 <div class="form-group">
-                    <label>Vraag / Raadsel</label>
+                    <label>Question / Puzzle</label>
                     <textarea rows="4" maxlength="300" placeholder="Typ hier het raadsel..." id="draft-question"></textarea>
                     <div id="qCount" class="char-count">0 / 300</div>
                 </div>
 
                 <div class="form-group">
-                    <label>Correcte Antwoord</label>
+                    <label>Correct Answer</label>
                     <input type="text" id="draft-answer" maxlength="100" placeholder="Vul hier het juiste antwoord in">
                     <div id="sCount" class="char-count">0 / 100</div>
                 </div>
 
                 <hr style="border-color: var(--primary); margin: 30px 0;">
-                <h4 style="margin-bottom: 15px; color: #aaa;">Regels, Straffen & Hints</h4>
+                <h4 style="margin-bottom: 15px; color: #aaa;">Rules, Penalties & Hints</h4>
 
                 <div class="flex-row">
                     <div class="form-group">
-                        <label><img src="google_symb.png" class="tab-icon" alt=""> Anti-Google Timer (sec, max 99, 0 = uit)</label>
+                        <label><img src="google_symb.png" class="tab-icon" alt=""> Anti-Google Timer (sec, max 99, 0 = off)</label>
                         <input type="number" id="puzzle-timer" min="0" max="99" value="0" placeholder="Bv. 0">
                     </div>
                     <div class="form-group">
-                        <label><img src="gain_points.png" class="tab-icon" alt=""> Max Punten (max 99)</label>
+                        <label><img src="gain_points.png" class="tab-icon" alt=""> Max Ppoints (max 99)</label>
                         <input type="number" id="puzzle-points" min="1" max="99" value="30" placeholder="Bv. 30">
                     </div>
                 </div>
 
                 <div class="flex-row">
                     <div class="form-group">
-                        <label><img src="Chicken_symb.png" class="tab-icon" alt=""> Chicken Penalty (max 99, 0 = uit)</label>
+                        <label><img src="Chicken_symb.png" class="tab-icon" alt=""> Chicken Penalty (max 99, 0 = off)</label>
                         <input type="number" id="puzzle-chicken" min="0" max="99" value="0" placeholder="Bv. 0">
                     </div>
                     <div class="form-group">
-                        <label><img src="faul.symb.png" class="tab-icon" alt=""> Straf per fout antwoord (max 99)</label>
+                        <label><img src="faul.symb.png" class="tab-icon" alt=""> Penalty for each incorrect answer (max 99)</label>
                         <input type="number" id="puzzle-penalty" min="0" max="99" value="10" placeholder="Bv. 10">
                     </div>
                 </div>
                 <div style="background: var(--bg-panel); padding: 15px; border-radius: 4px; margin-top: 15px; border-left: 4px solid #4285F4;">
-                    <h5 style="margin-bottom: 10px; font-size: 1rem; color: #4285F4; display: flex; align-items: center; gap: 6px;"><img src="hint_symb.png" class="tab-icon" alt=""> Hints voor de Speler (Optioneel)</h5>
+                    <h5 style="margin-bottom: 10px; font-size: 1rem; color: #4285F4; display: flex; align-items: center; gap: 6px;"><img src="hint_symb.png" class="tab-icon" alt=""> Hints for the Player (Optional)</h5>
                     <div class="form-group">
-                        <label>Hint 1 (Getoond bij 1e foute gok)</label>
+                        <label>Hint 1 (Shown upon the first incorrect guess)</label>
                         <input type="text" id="hint-1" placeholder="Kleine tip...">
                     </div>
                     <div class="form-group" style="margin-top: 15px;">
-                        <label>Hint 2 (Getoond bij 2e foute gok)</label>
+                        <label>Hint 2 (Shown upon the second incorrect guess)</label>
                         <input type="text" id="hint-2" placeholder="Grote tip...">
                     </div>
                 </div>
@@ -290,44 +290,44 @@
                 <h4 style="margin-bottom: 15px; color: #aaa;">Als de speler faalt...</h4>
                 
                 <div class="form-group">
-                    <label>Wat gebeurt er na 3 foute pogingen?</label>
+                    <label>What happens after 3 failed attempts?</label>
                     <select id="reveal-answer-optie" onchange="togglePaidCreditsInput()">
-                        <option value="free_answer" selected>Ja, toon antwoord gratis</option>
-                        <option value="no_answer">Nee, antwoord blijft geheim</option>
-                        <option value="paid_answer">Ja, antwoord tegen betaling (Credits)</option>
+                        <option value="free_answer" selected>Yes, show answer for free</option>
+                        <option value="no_answer">No, the answer remains a secret.</option>
+                        <option value="paid_answer">Yes, answer for a fee (Credits)</option>
                     </select>
                 </div>
 
                 <div class="form-group" id="paid-credits-group" style="display: none; margin-top: 10px;">
-                    <label>🪙 Aantal benodigde Credits (max 99)</label>
+                    <label>🪙 Number of credits required (max 99)</label>
                     <input type="number" id="puzzle-credits-cost" min="1" max="99" value="5" placeholder="Bv. 5">
                 </div>
 
                 <p id="publish-message" style="color: var(--warning); font-size: 0.9rem; margin-bottom: 10px;"></p>
 
                 <div style="margin-top: 20px; text-align: right; display: flex; justify-content: flex-end; gap: 10px;">
-                    <button type="button" class="btn" id="btn-cancel-edit" style="background-color: #555; display: none;" onclick="cancelEditMode()">Annuleren</button>
-                    <button type="button" class="btn" style="background-color: #555;" onclick="saveDraft()"><img src="local_save_symb.png" class="tab-icon" alt=""> Lokaal Opslaan</button>
-                    <button type="button" class="btn" id="btn-publish-puzzle" style="background-color: var(--success);"><img src="publish_symb.png" class="tab-icon" alt=""> Publiceer Puzzel</button>
+                    <button type="button" class="btn" id="btn-cancel-edit" style="background-color: #555; display: none;" onclick="cancelEditMode()">Cancel</button>
+                    <button type="button" class="btn" style="background-color: #555;" onclick="saveDraft()"><img src="local_save_symb.png" class="tab-icon" alt=""> Save Locally</button>
+                    <button type="button" class="btn" id="btn-publish-puzzle" style="background-color: var(--success);"><img src="publish_symb.png" class="tab-icon" alt=""> Publish Puzzle</button>
                 </div>
             </form>
         </div>
 
         <div id="tab-stats" class="tab-panel">
-            <h3>Mijn Administratie & Creaties</h3>
-            <p style="margin-bottom: 20px; color: #aaa;">Beheer hier al je unieke puzzels, likes en actieve ontwerpers-credits.</p>
+            <h3>My Administration & Creations</h3>
+            <p style="margin-bottom: 20px; color: #aaa;">Manage all your unique puzzles, likes, and active designer credits here.</p>
             
             <div class="stats-grid">
                 <div class="stat-card" style="border-color: #4285F4;">
-                    <h4>Unieke Puzzels</h4>
+                    <h4>Unique Puzzles</h4>
                     <p id="stat-total-puzzles">0</p>
                 </div>
                 <div class="stat-card" style="border-color: gold;">
-                    <h4>Mijn Credits</h4>
+                    <h4>My Credits</h4>
                     <p id="stat-total-credits" style="color: gold;">0 <img src="rinth_symb.png" class="tab-icon" alt=""></p>
                 </div>
                 <div class="stat-card" style="border-color: var(--success);">
-                    <h4>Ontvangen Waardering</h4>
+                    <h4>Ratings Received</h4>
                     <p style="font-size: 1.3rem; margin-top: 5px;">
                         <span style="color: var(--success);" id="stat-total-likes"><img src="like_green_symb.png" class="tab-icon" alt=""> 0</span> <br>
                         <span style="color: var(--danger);" id="stat-total-dislikes"><img src="disLike_red_symb.png" class="tab-icon" alt=""> 0</span>
@@ -338,14 +338,14 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Puzzelnaam</th>
-                        <th style="text-align: center;">Waardering</th>
-                        <th style="text-align: center;">Acties</th>
+                        <th>Puzzle Name</th>
+                        <th style="text-align: center;">valuation</th>
+                        <th style="text-align: center;">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="designer-puzzles-table">
                     <tr>
-                        <td colspan="3" style="text-align: center; color: #888;">Nog geen puzzels gevonden. Maak er een aan bij 'Nieuwe Puzzel'!</td>
+                        <td colspan="3" style="text-align: center; color: #888;">No puzzles found yet. Create one under 'New Puzzle'!</td>
                     </tr>
                 </tbody>
             </table>
@@ -405,12 +405,12 @@
                 imgElem.src = avatarUrl.trim();
                 imgElem.style.display = 'block';
                 svgPlaceholder.style.display = 'none';
-                caption.textContent = "Dit is jouw actieve ontwerpersavatar.";
+                caption.textContent = "This is your active designer avatar.";
                 inputField.value = avatarUrl.trim();
             } else {
                 imgElem.style.display = 'none';
                 svgPlaceholder.style.display = 'block';
-                caption.textContent = "Voer links een afbeeldings-URL in om je eigen avatar te tonen.";
+                caption.textContent = "Enter an image URL on the left to display your own avatar.";
                 inputField.value = '';
             }
         }
@@ -451,7 +451,7 @@
                 currentUserId = null;
                 toggleAuthView('login');
                 document.getElementById('display-user-id').textContent = '';
-                document.getElementById('display-username').textContent = 'Ontwerper';
+                document.getElementById('display-username').textContent = 'designer';
                 renderAvatar(null);
 
                 document.getElementById('nav-create').style.display = 'none'; 
@@ -521,7 +521,7 @@
                 countElem.textContent = '0';
                 likesElem.innerHTML = `<img src="like_green_symb.png" class="tab-icon" alt=""> 0`;
                 dislikesElem.innerHTML = `<img src="disLike_red_symb.png" class="tab-icon" alt=""> 0`;
-                tableBody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #888;">Nog geen puzzels gevonden. Maak er een aan bij 'Nieuwe Puzzel'!</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #888;">No puzzles found yet. Create one under 'New Puzzle'!</td></tr>`;
             }
         }
 
@@ -908,7 +908,7 @@ async function deletePuzzleByName(puzzleName) {
             const password = document.getElementById('reg-password').value;
             
             if(!email || !password) { 
-                msgBox.textContent = "Vul alstublieft een e-mail en wachtwoord in!"; 
+                msgBox.textContent = "Please enter an email and password!"; 
                 return; 
             }
 
@@ -925,7 +925,7 @@ async function deletePuzzleByName(puzzleName) {
                 msgBox.textContent = "Fout: " + error.message; 
             } else { 
                 msgBox.style.color = "var(--success)"; 
-                msgBox.textContent = "Registratie succesvol! Controleer je e-mail om de registratie te bevestigen."; 
+                msgBox.textContent = "Registratie succesvol! Controleer je e-mail inbox en spam of junk map om de registratie te bevestigen. De afzender is: Supabase Auth"; 
             }
         });
 
@@ -969,7 +969,7 @@ async function deletePuzzleByName(puzzleName) {
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
             
-            if(!email || !password) { msgBox.textContent = "Vul e-mail en wachtwoord in!"; return; }
+            if(!email || !password) { msgBox.textContent = "Enter your email and password!"; return; }
 
             const { data, error } = await supabaseClient.auth.signInWithPassword({ email: email, password: password });
             if (error) { msgBox.textContent = "Fout bij inloggen: " + error.message; }
