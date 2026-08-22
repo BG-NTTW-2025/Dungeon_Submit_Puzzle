@@ -462,7 +462,7 @@
 
 async function loadDesignerPuzzles(designerId) {
             const { data: puzzles, error } = await supabaseClient
-                .from('Puzzle_Labyrinth')
+                .from('e.g.')
                 .select('*')
                 .eq('designer_id', designerId)
                 .eq('is_open', false)          
@@ -612,7 +612,7 @@ async function deletePuzzleByName(puzzleName) {
 
     // 1. Zoek de rijen op die bij deze puzzel horen (zowel de start als de target kant)
     const { data: targetPuzzles, error: fetchError } = await supabaseClient
-        .from('Puzzle_Labyrinth')
+        .from('e.g.')
         .select('id')
         .eq('designer_id', currentUserId)
         .in('puzzle_name', [puzzleName, puzzleName + ' (Target)']);
@@ -627,7 +627,7 @@ async function deletePuzzleByName(puzzleName) {
         // Zo blijft de doorgang netjes bestaan in het labyrint voor de spelers.
         for (let p of targetPuzzles) {
             const { error: updateError } = await supabaseClient
-                .from('Puzzle_Labyrinth')
+                .from('e.g.')
                 .update({
                     puzzle_name: null,
 					created_at: null,
@@ -726,7 +726,7 @@ async function deletePuzzleByName(puzzleName) {
                 const oldName = oldPuzzle ? oldPuzzle.puzzle_name : puzzleName;
 
                 const { error: updateError } = await supabaseClient
-                    .from('Puzzle_Labyrinth')
+                    .from('e.g.')
                     .update({
                         puzzle_name: puzzleName,
                         question: question,
@@ -744,7 +744,7 @@ async function deletePuzzleByName(puzzleName) {
                     .eq('puzzle_name', oldName);
 
                 await supabaseClient
-                    .from('Puzzle_Labyrinth')
+                    .from('e.g.')
                     .update({
                         puzzle_name: puzzleName + ' (Target)',
                         question: question,
@@ -779,7 +779,7 @@ async function deletePuzzleByName(puzzleName) {
             const directions = ['north', 'south', 'east', 'west'];
 
             let { data: existingPuzzles, error: fetchError } = await supabaseClient
-                .from('Puzzle_Labyrinth')
+                .from('e.g.')
                 .select('room_id, wall_side, pos_x, pos_y');
 
             if (fetchError) {
@@ -842,7 +842,7 @@ async function deletePuzzleByName(puzzleName) {
             }
 
             const { error: insertError } = await supabaseClient
-                .from('Puzzle_Labyrinth')
+                .from('e.g.')
                 .insert([
                     {
                         designer_id: currentUserId,
