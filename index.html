@@ -110,15 +110,13 @@
 </head>
 <body>
 
-    <div class="sidebar">
+<div class="sidebar">
         <h2>Puzzle Designer</h2>
-        <button class="tab-button active" onclick="openTab('tab-profile')"><img src="settings_symb.png" class="tab-icon" alt=""> Profile & Login</button>
-        <button class="tab-button" onclick="clickNieuwePuzzelMenu()" id="nav-create" style="display:none;"><img src="puzzle_piece_symb.png" class="tab-icon" alt=""> New Puzzle</button>
-        <button class="tab-button" onclick="openTab('tab-stats')" id="nav-stats" style="display:none;"><img src="my_creation_symb.png" class="tab-icon" alt=""> My Creations</button>
-        
-        <!-- Nieuwe menu-opties -->
-        <a href="https://bg-nttw-2025.github.io/Dungeon_Map/" target="_blank" class="tab-button"><img src="maze_map_symb.png" class="tab-icon" alt=""> Dungeon Map</a>
-        <a href="https://bg-nttw-2025.github.io/Dungeon/" target="_blank" class="tab-button"><img src="pion_symb.png" class="tab-icon" alt=""> The Game</a>
+        <button class="tab-button active" onclick="openTab('tab-profile')">⚙️ Profiel & Login</button>
+        <button class="tab-button" onclick="openDungeonMap()" id="nav-map" style="display:none;">🗺️ Dungeon Map</button>
+        <button class="tab-button" onclick="openTab('tab-create')" id="nav-create" style="display:none;">🧩 Nieuwe Puzzel</button>
+        <button class="tab-button" onclick="openTab('nav-stats')" id="nav-stats" style="display:none;">📊 Mijn Creaties</button>
+        <button class="tab-button" onclick="openTheGame()">🟡 The Game</button>
     </div>
 
     <div class="main-content">
@@ -453,8 +451,9 @@
                 renderAvatar(designerData.avatar);
                 document.getElementById('stat-total-credits').innerHTML = (designerData.credits_balance || 0) + ' <img src="rinth_symb.png" class="tab-icon" alt="">';
 
+				document.getElementById('nav-map').style.display = 'flex'; 
                 document.getElementById('nav-create').style.display = 'flex'; 
-                document.getElementById('nav-stats').style.display = 'flex'; 
+                document.getElementById('nav-stats').style.display = 'flex';
                 
                 loadDesignerPuzzles(currentUserId);
             } else {
