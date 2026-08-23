@@ -140,6 +140,13 @@
                         <p id="auth-message-login" style="color: var(--warning); font-size: 0.9rem; margin-bottom: 10px;"></p>
                         
                         <button class="btn" id="btn-login" style="width: 100%;">Log In</button>
+						
+						<button class="btn" id="btn-login" style="width: 100%;">Log In</button>
+                        
+                        <!-- Hier voegen we de wachtwoord vergeten link toe -->
+                        <div style="margin-top: 10px; text-align: right;">
+                            <a href="#" onclick="forgotPassword(event)" style="font-size: 0.85rem; color: var(--accent); text-decoration: none;">Wachtwoord vergeten?</a>
+                        </div>
                         
                         <div style="margin-top: 25px; text-align: center;">
                             <p style="color: #aaa; margin-bottom: 10px;">Don't have an account yet?</p>
@@ -461,6 +468,33 @@
                 document.getElementById('nav-create').style.display = 'none'; 
                 document.getElementById('nav-stats').style.display = 'none'; 
                 openTab('tab-profile');
+            }
+        }
+		
+		async function forgotPassword(event) {
+            event.preventDefault();
+            const emailInput = document.getElementById('auth-email').value.trim();
+            const msgBox = document.getElementById('auth-message-login');
+
+            if (!emailInput) {
+                msgBox.style.color = "var(--accent)";
+                msgBox.textContent = "Vul eerst je e-mailadres in bij het e-mail veld hierboven!";
+                return;
+            }
+
+            msgBox.style.color = "var(--warning)";
+            msgBox.textContent = "Herstel-e-mail versturen...";
+
+            const { data, error } = await supabaseClient.auth.resetPasswordForEmail(emailInput, {
+                redirectTo: 'https://bg-nttw-2025.github.io/Dungeon_Submit_Puzzle/'
+            });
+
+            if (error) {
+                msgBox.style.color = "var(--accent)";
+                msgBox.textContent = "Fout: " + error.message;
+            } else {
+                msgBox.style.color = "var(--success)";
+                msgBox.textContent = "Controleer je e-mail! We hebben een herstellink gestuurd.";
             }
         }
 
