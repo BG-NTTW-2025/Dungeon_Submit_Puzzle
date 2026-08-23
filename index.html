@@ -144,7 +144,7 @@
                         <button class="btn" id="btn-login" style="width: 100%;">Log In</button>
 						
                       
-                        <!-- Hier voegen we de wachtwoord vergeten link toe -->
+                        <!-- Wachtwoord vergeten link -->
                         <div style="margin-top: 10px; text-align: right;">
                             <a href="#" onclick="forgotPassword(event)" style="font-size: 0.85rem; color: var(--accent); text-decoration: none;">Forgot Password?</a>
                         </div>
@@ -271,7 +271,7 @@
                         <input type="number" id="puzzle-timer" min="0" max="99" value="0" placeholder="e.g. 0">
                     </div>
                     <div class="form-group">
-                        <label><img src="gain_points.png" class="tab-icon" alt=""> Max Ppoints (max 99)</label>
+                        <label><img src="gain_points.png" class="tab-icon" alt=""> Max Points (max 99)</label>
                         <input type="number" id="puzzle-points" min="1" max="99" value="30" placeholder="e.g. 30">
                     </div>
                 </div>
@@ -378,8 +378,8 @@
         const qCount = document.getElementById('qCount');
         const sCount = document.getElementById('sCount');
 
-        qInput.addEventListener('input', () => { qCount.textContent = `${qInput.value.length} / 300`; });
-        sInput.addEventListener('input', () => { sCount.textContent = `${sInput.value.length} / 100`; });
+        qInput.addEventListener('input', () => { qCount.textContent = qInput.value.length + ' / 300'; });
+        sInput.addEventListener('input', () => { sCount.textContent = sInput.value.length + ' / 100'; });
 
         function togglePaidCreditsInput() {
             const selectVal = document.getElementById('reveal-answer-optie').value;
@@ -548,10 +548,8 @@
 
                     const statsCell = document.createElement('td');
                     statsCell.style.textAlign = 'center';
-                    statsCell.innerHTML = `
-                        <span style="color: var(--success); font-weight: bold;"><img src="like_green_symb.png" class="tab-icon" alt=""> ${p.likes}</span> <br>
-                        <span style="color: var(--danger); font-weight: bold;"><img src="disLike_red_symb.png" class="tab-icon" alt=""> ${p.dislikes || 0}</span>
-                    `;
+                    statsCell.innerHTML = '<span style="color: var(--success); font-weight: bold;"><img src="like_green_symb.png" class="tab-icon" alt=""> ' + p.likes + '</span> <br>' +
+                        '<span style="color: var(--danger); font-weight: bold;"><img src="disLike_red_symb.png" class="tab-icon" alt=""> ' + (p.dislikes || 0) + '</span>';
 
                     const actionsCell = document.createElement('td');
                     actionsCell.style.textAlign = 'center';
@@ -580,14 +578,14 @@
                     tableBody.appendChild(row);
                 });
 
-                likesElem.innerHTML = `<img src="like_green_symb.png" class="tab-icon" alt=""> ${totalLikes}`;
-                dislikesElem.innerHTML = `<img src="disLike_red_symb.png" class="tab-icon" alt=""> ${totalDislikes}`;
+                likesElem.innerHTML = '<img src="like_green_symb.png" class="tab-icon" alt=""> ' + totalLikes;
+                dislikesElem.innerHTML = '<img src="disLike_red_symb.png" class="tab-icon" alt=""> ' + totalDislikes;
             } else {
                 uniqueDesignerPuzzles = [];
                 countElem.textContent = '0';
-                likesElem.innerHTML = `<img src="like_green_symb.png" class="tab-icon" alt=""> 0`;
-                dislikesElem.innerHTML = `<img src="disLike_red_symb.png" class="tab-icon" alt=""> 0`;
-                tableBody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #888;">No puzzles found yet. Create one under 'New Puzzle'!</td></tr>`;
+                likesElem.innerHTML = '<img src="like_green_symb.png" class="tab-icon" alt=""> 0';
+                dislikesElem.innerHTML = '<img src="disLike_red_symb.png" class="tab-icon" alt=""> 0';
+                tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #888;">No puzzles found yet. Create one under \'New Puzzle\'!</td></tr>';
             }
         }
 
@@ -623,8 +621,8 @@
             document.getElementById('puzzle-credits-cost').value = Math.min(99, puzzle.credits_cost || 5);
             togglePaidCreditsInput();
 
-            qCount.textContent = `${(puzzle.question || '').length} / 300`;
-            sCount.textContent = `${(puzzle.answer || '').length} / 100`;
+            qCount.textContent = (puzzle.question || '').length + ' / 300';
+            sCount.textContent = (puzzle.answer || '').length + ' / 100';
 
             document.getElementById('form-title').textContent = "Edit Puzzle";
             document.getElementById('btn-publish-puzzle').innerHTML = '<img src="publish_symb.png" class="tab-icon" alt=""> Save Changes';
@@ -647,7 +645,7 @@
         }
 
         async function deletePuzzleByName(puzzleName) {
-            if (!confirm(`Are you sure you want to remove the puzzle "${puzzleName}"? The puzzle will disappear, and the passage will be permanently opened for players.`)) return;
+            if (!confirm('Are you sure you want to remove the puzzle "' + puzzleName + '"? The puzzle will disappear, and the passage will be permanently opened for players.')) return;
 
             const { data: targetPuzzles, error: fetchError } = await supabaseClient
                 .from('puzzle_labyrinth')
@@ -928,7 +926,7 @@
                 msgBox.textContent = "Error during publishing: " + insertError.message;
             } else {
                 msgBox.style.color = "var(--success)";
-                msgBox.innerHTML = `<img src="succ_publ_symb.png" style="width:16px; vertical-align:middle; margin-right:4px;" alt=""> Puzzle successfully placed between the Chambers${selectedRoomId} and ${targetRoomId}!`;
+                msgBox.innerHTML = '<img src="succ_publ_symb.png" style="width:16px; vertical-align:middle; margin-right:4px;" alt=""> Puzzle successfully placed between the Chambers ' + selectedRoomId + ' and ' + targetRoomId + '!';
                 document.getElementById('puzzle-form').reset();
                 togglePaidCreditsInput();
                 qCount.textContent = "0 / 300";
@@ -1006,7 +1004,7 @@
                 .maybeSingle();
 
             if (existingUser) {
-                msgBox.textContent = `This Name "${username}" is already in use!`;
+                msgBox.textContent = 'This Name "' + username + '" is already in use!';
                 return;
             }
 
@@ -1054,7 +1052,7 @@
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             
-            const activeBtn = document.querySelector(`button[onclick*="${tabId}"]`);
+            const activeBtn = document.querySelector('button[onclick*="' + tabId + '"]');
             if (activeBtn) activeBtn.classList.add('active');
         }
 
