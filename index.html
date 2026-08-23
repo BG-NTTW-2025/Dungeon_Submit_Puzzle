@@ -35,7 +35,7 @@
         .sidebar h2 { text-align: center; color: var(--accent); margin-bottom: 30px; font-size: 1.5rem; }
 
         .tab-button {
-            background: none; border: none; color: var(--text-light); padding: 15px 20px; text-align: left; font-size: 1.1rem; cursor: pointer; transition: background 0.2s, border-left 0.2s; border-left: 4px solid transparent; display: flex; align-items: center; gap: 10px;
+            background: none; border: none; color: var(--text-light); padding: 15px 20px; text-align: left; font-size: 1.1rem; cursor: pointer; transition: background 0.2s, border-left 0.2s; border-left: 4px solid transparent; display: flex; align-items: center; gap: 10px; text-decoration: none; width: 100%;
         }
 
         .tab-button:hover { background-color: var(--primary); }
@@ -115,6 +115,10 @@
         <button class="tab-button active" onclick="openTab('tab-profile')"><img src="settings_symb.png" class="tab-icon" alt=""> Profile & Login</button>
         <button class="tab-button" onclick="clickNieuwePuzzelMenu()" id="nav-create" style="display:none;"><img src="puzzle_piece_symb.png" class="tab-icon" alt=""> New Puzzle</button>
         <button class="tab-button" onclick="openTab('tab-stats')" id="nav-stats" style="display:none;"><img src="my_creation_symb.png" class="tab-icon" alt=""> My Creations</button>
+        
+        <!-- Nieuwe menu-opties -->
+        <a href="https://bg-nttw-2025.github.io/Dungeon_Map/" target="_blank" class="tab-button"><img src="maze_map_symb.png" class="tab-icon" alt=""> Dungeon Map</a>
+        <a href="https://bg-nttw-2025.github.io/Dungeon/" target="_blank" class="tab-button"><img src="pion_symb.png" class="tab-icon" alt=""> The Game</a>
     </div>
 
     <div class="main-content">
@@ -460,7 +464,7 @@
             }
         }
 
-async function loadDesignerPuzzles(designerId) {
+        async function loadDesignerPuzzles(designerId) {
             const { data: puzzles, error } = await supabaseClient
                 .from('puzzle_labyrinth')
                 .select('*')
@@ -502,7 +506,6 @@ async function loadDesignerPuzzles(designerId) {
                     totalDislikes += p.dislikes || 0;
                     const row = document.createElement('tr');
                     
-                    // We maken veilige knoppen aan via DOM-elementen in plaats van gevaarlijke inline HTML strings
                     const nameCell = document.createElement('td');
                     nameCell.textContent = p.puzzle_name;
 
@@ -606,58 +609,53 @@ async function loadDesignerPuzzles(designerId) {
             openTab('tab-stats');
         }
 
-// PUNT 5: Puzzel opheffen, record behouden in Supabase en omzetten naar een open doorgang
-async function deletePuzzleByName(puzzleName) {
-    if (!confirm(`Are you sure you want to remove the puzzle "${puzzleName}"? The puzzle will disappear, and the passage will be permanently opened for players.`)) return;
+        async function deletePuzzleByName(puzzleName) {
+            if (!confirm(`Are you sure you want to remove the puzzle "${puzzleName}"? The puzzle will disappear, and the passage will be permanently opened for players.`)) return;
 
-    // 1. Zoek de rijen op die bij deze puzzel horen (zowel de start als de target kant)
-    const { data: targetPuzzles, error: fetchError } = await supabaseClient
-        .from('puzzle_labyrinth')
-        .select('id')
-        .eq('designer_id', currentUserId)
-        .in('puzzle_name', [puzzleName, puzzleName + ' (Target)']);
-
-    if (fetchError) {
-        alert("Error retrieving puzzle data: " + fetchError.message);
-        return;
-    }
-
-    if (targetPuzzles && targetPuzzles.length > 0) {
-        // 2. UPDATE de bestaande records in plaats van ze te wissen!
-        // Zo blijft de doorgang netjes bestaan in het labyrint voor de spelers.
-        for (let p of targetPuzzles) {
-            const { error: updateError } = await supabaseClient
+            const { data: targetPuzzles, error: fetchError } = await supabaseClient
                 .from('puzzle_labyrinth')
-                .update({
-                    puzzle_name: null,
-					created_at: null,
-					// designer_id: null,
-					designer_name: 'Labyrinth System',
-                    question: null,
-                    answer: null,
-                    google_timer: 0,
-                    max_reward: 0,
-                    chicken_penalty: 0,
-                    wrong_penalty: 0,
-                    hint_1: null,
-                    hint_2: null,
-                    reveal_answer: 'free_answer',
-                    credits_cost: 0,
-                    likes: 0,
-                    dislikes: 0,
-                    is_open: true // Deur blijft bestaan, maar is nu open!
-                })
-                .eq('id', p.id);
+                .select('id')
+                .eq('designer_id', currentUserId)
+                .in('puzzle_name', [puzzleName, puzzleName + ' (Target)']);
 
-            if (updateError) {
-                console.error("Error opening passage ID " + p.id, updateError.message);
+            if (fetchError) {
+                alert("Error retrieving puzzle data: " + fetchError.message);
+                return;
             }
-        }
-    }
 
-    alert("The puzzle has been removed and the passageway in the labyrinth has been opened!");
-    loadDesignerPuzzles(currentUserId);
-}
+            if (targetPuzzles && targetPuzzles.length > 0) {
+                for (let p of targetPuzzles) {
+                    const { error: updateError } = await supabaseClient
+                        .from('puzzle_labyrinth')
+                        .update({
+                            puzzle_name: null,
+                            created_at: null,
+                            designer_name: 'Labyrinth System',
+                            question: null,
+                            answer: null,
+                            google_timer: 0,
+                            max_reward: 0,
+                            chicken_penalty: 0,
+                            wrong_penalty: 0,
+                            hint_1: null,
+                            hint_2: null,
+                            reveal_answer: 'free_answer',
+                            credits_cost: 0,
+                            likes: 0,
+                            dislikes: 0,
+                            is_open: true
+                        })
+                        .eq('id', p.id);
+
+                    if (updateError) {
+                        console.error("Error opening passage ID " + p.id, updateError.message);
+                    }
+                }
+            }
+
+            alert("The puzzle has been removed and the passageway in the labyrinth has been opened!");
+            loadDesignerPuzzles(currentUserId);
+        }
 
         function getOppositeWall(wall) {
             switch (wall) {
@@ -925,7 +923,7 @@ async function deletePuzzleByName(puzzleName) {
             }
         });
 
- document.getElementById('btn-register-submit').addEventListener('click', async () => {
+        document.getElementById('btn-register-submit').addEventListener('click', async () => {
             const msgBox = document.getElementById('auth-message-reg');
             msgBox.textContent = "Account aanmaken...";
             msgBox.style.color = "var(--warning)";
