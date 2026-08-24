@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Puzzle Designer - Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">	</script>
+	<script defer src="https://cloud.umami.is/script.js" data-website-id="34c00f24-9584-4cfa-8b5e-b88dd715cdb0"></script>
         :root {
             --bg-dark: #1a1a2e;
             --bg-panel: #16213e;
@@ -112,15 +112,17 @@
 
 <div class="sidebar">
         <h2>Puzzle Designer</h2>
-        <button class="tab-button active" onclick="openTab('tab-profile')"><img src="settings_symb.png" class="tab-icon" alt=""> Profile & Login</button>
-        <button class="tab-button" onclick="clickNieuwePuzzelMenu()" id="nav-create" style="display:none;"><img src="puzzle_piece_symb.png" class="tab-icon" alt=""> New Puzzle</button>
-        <button class="tab-button" onclick="openTab('tab-stats')" id="nav-stats" style="display:none;"><img src="my_creation_symb.png" class="tab-icon" alt=""> My Creations</button>
-        
-        <!-- Dungeon Map (pas zichtbaar na inloggen) -->
-        <a href="https://bg-nttw-2025.github.io/Dungeon_Map/" target="_blank" class="tab-button" id="nav-map" style="display:none;"><img src="maze_map_symb.png" class="tab-icon" alt=""> Dungeon Map</a>
-        
-        <!-- The Game (altijd zichtbaar voor iedereen) -->
-        <a href="https://bg-nttw-2025.github.io/Dungeon/" target="_blank" class="tab-button"><img src="pion_symb.png" class="tab-icon" alt=""> The Game</a>
+<button class="tab-button active" onclick="openTab('tab-profile')" data-umami-event="Nav - Profile & Login"><img src="settings_symb.png" class="tab-icon" alt=""> Profile & Login</button>
+
+<button class="tab-button" onclick="clickNieuwePuzzelMenu()" id="nav-create" style="display:none;" data-umami-event="Nav - New Entry"><img src="puzzle_piece_symb.png" class="tab-icon" alt=""> New Entry</button>
+
+<button class="tab-button" onclick="openTab('tab-stats')" id="nav-stats" style="display:none;" data-umami-event="Nav - My Creations"><img src="my_creation_symb.png" class="tab-icon" alt=""> My Creations</button>
+
+<!-- Dungeon Map (pas zichtbaar na inloggen) -->
+<a href="https://bg-nttw-2025.github.io/Dungeon_Map/" target="_blank" class="tab-button" id="nav-map" style="display:none;" data-umami-event="Nav - Dungeon Map"><img src="maze_map_symb.png" class="tab-icon" alt=""> Dungeon Map</a>
+
+<!-- The Game (altijd zichtbaar voor iedereen) -->
+<a href="https://bg-nttw-2025.github.io/Dungeon/" target="_blank" class="tab-button" data-umami-event="Nav - The Game"><img src="pion_symb.png" class="tab-icon" alt=""> The Game</a>
     </div>
 
     <div class="main-content">
