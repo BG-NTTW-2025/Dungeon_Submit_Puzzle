@@ -407,6 +407,39 @@
                 document.getElementById('login-form-view').style.display = 'block';
             }
         }
+		
+document.getElementById('btn-save-password').addEventListener('click', async () => {
+            const newPassword = document.getElementById('new-password-input').value.trim();
+            const msgBox = document.getElementById('password-update-msg');
+
+            if (!newPassword || newPassword.length < 6) {
+                msgBox.style.color = "var(--accent)";
+                msgBox.textContent = "Please enter a valid password (at least 6 characters).";
+                return;
+            }
+
+            msgBox.style.color = "var(--warning)";
+            msgBox.textContent = "Updating password...";
+
+            const { data, error } = await supabaseClient.auth.updateUser({
+                password: newPassword
+            });
+
+            if (error) {
+                msgBox.style.color = "var(--accent)";
+                msgBox.textContent = "Error updating password: " + error.message;
+            } else {
+                msgBox.style.color = "var(--success)";
+                msgBox.textContent = "Password successfully updated!";
+                document.getElementById('new-password-input').value = '';
+                
+                // Sluit het menu na een paar seconden of laat het zien
+                setTimeout(() => {
+                    togglePasswordSection();
+                    msgBox.textContent = '';
+                }, 3000);
+            }
+        });		
 
         function renderAvatar(avatarUrl) {
             const imgElem = document.getElementById('avatar-img-preview');
