@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Puzzle Designer - Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">	</script>
-	<script defer src="https://cloud.umami.is/script.js" data-website-id="34c00f24-9584-4cfa-8b5e-b88dd715cdb0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="34c00f24-9584-4cfa-8b5e-b88dd715cdb0"></script>
+    <style>
         :root {
             --bg-dark: #1a1a2e;
             --bg-panel: #16213e;
@@ -112,17 +113,15 @@
 
 <div class="sidebar">
         <h2>Puzzle Designer</h2>
-<button class="tab-button active" onclick="openTab('tab-profile')" data-umami-event="Nav - Profile & Login"><img src="settings_symb.png" class="tab-icon" alt=""> Profile & Login</button>
-
-<button class="tab-button" onclick="clickNieuwePuzzelMenu()" id="nav-create" style="display:none;" data-umami-event="Nav - New Entry"><img src="puzzle_piece_symb.png" class="tab-icon" alt=""> New Entry</button>
-
-<button class="tab-button" onclick="openTab('tab-stats')" id="nav-stats" style="display:none;" data-umami-event="Nav - My Creations"><img src="my_creation_symb.png" class="tab-icon" alt=""> My Creations</button>
-
-<!-- Dungeon Map (pas zichtbaar na inloggen) -->
-<a href="https://bg-nttw-2025.github.io/Dungeon_Map/" target="_blank" class="tab-button" id="nav-map" style="display:none;" data-umami-event="Nav - Dungeon Map"><img src="maze_map_symb.png" class="tab-icon" alt=""> Dungeon Map</a>
-
-<!-- The Game (altijd zichtbaar voor iedereen) -->
-<a href="https://bg-nttw-2025.github.io/Dungeon/" target="_blank" class="tab-button" data-umami-event="Nav - The Game"><img src="pion_symb.png" class="tab-icon" alt=""> The Game</a>
+        <button class="tab-button active" onclick="openTab('tab-profile')"><img src="settings_symb.png" class="tab-icon" alt=""> Profile & Login</button>
+        <button class="tab-button" onclick="clickNieuwePuzzelMenu()" id="nav-create" style="display:none;"><img src="puzzle_piece_symb.png" class="tab-icon" alt=""> New Entry</button>
+        <button class="tab-button" onclick="openTab('tab-stats')" id="nav-stats" style="display:none;"><img src="my_creation_symb.png" class="tab-icon" alt=""> My Creations</button>
+        
+        <!-- Dungeon Map (pas zichtbaar na inloggen) -->
+        <a href="https://bg-nttw-2025.github.io/Dungeon_Map/" target="_blank" class="tab-button" id="nav-map" style="display:none;"><img src="maze_map_symb.png" class="tab-icon" alt=""> Dungeon Map</a>
+        
+        <!-- The Game (altijd zichtbaar voor iedereen) -->
+        <a href="https://bg-nttw-2025.github.io/Dungeon/" target="_blank" class="tab-button" id="nav-game"><img src="pion_symb.png" class="tab-icon" alt=""> The Game</a>
     </div>
 
     <div class="main-content">
@@ -148,12 +147,12 @@
                       
                         <!-- Wachtwoord vergeten link -->
                         <div style="margin-top: 10px; text-align: right;">
-                            <a href="#" onclick="forgotPassword(event)" style="font-size: 0.85rem; color: var(--accent); text-decoration: none;">Forgot Password?</a>
+                            <a href="#" onclick="forgotPassword(event)" id="link-forgot-password" style="font-size: 0.85rem; color: var(--accent); text-decoration: none;">Forgot Password?</a>
                         </div>
                         
                         <div style="margin-top: 25px; text-align: center;">
                             <p style="color: #aaa; margin-bottom: 10px;">Don't have an account yet?</p>
-                            <button class="btn btn-outline" onclick="toggleAuthView('register')" style="width: 100%;">Create a new account</button>
+                            <button class="btn btn-outline" id="btn-to-register" onclick="toggleAuthView('register')" style="width: 100%;">Create a new account</button>
                         </div>
                     </div>
 
@@ -211,11 +210,11 @@
                         </div>
 
                         <div id="password-settings" class="password-section">
-    <h4 style="margin-bottom: 15px;">Change Password</h4>
-    <div class="form-group"><input type="password" id="new-password-input" placeholder="New Password (min. 6 characters)"></div>
-    <p id="password-update-msg" style="font-size: 0.85rem; margin-bottom: 10px;"></p>
-    <button class="btn" id="btn-save-password" style="background-color: var(--warning); width: 100%;">Save New Password</button>
-</div>
+                            <h4 style="margin-bottom: 15px;">Change Password</h4>
+                            <div class="form-group"><input type="password" id="new-password-input" placeholder="New Password (min. 6 characters)"></div>
+                            <p id="password-update-msg" style="font-size: 0.85rem; margin-bottom: 10px;"></p>
+                            <button class="btn" id="btn-save-password" style="background-color: var(--warning); width: 100%;">Save New Password</button>
+                        </div>
                         
                         <br>
                         <button class="btn" id="btn-logout" style="background-color: #ff3333; width: 100%;">Log out</button>
@@ -384,6 +383,21 @@
         qInput.addEventListener('input', () => { qCount.textContent = qInput.value.length + ' / 300'; });
         sInput.addEventListener('input', () => { sCount.textContent = sInput.value.length + ' / 100'; });
 
+        // Umami Event Trackers voor knoppen
+        function trackUmami(eventName) {
+            if (window.umami) {
+                window.umami.track(eventName);
+            }
+        }
+
+        document.getElementById('nav-create').addEventListener('click', () => trackUmami('Nav - New Entry'));
+        document.getElementById('nav-map').addEventListener('click', () => trackUmami('Nav - Dungeon Map'));
+        document.getElementById('nav-game').addEventListener('click', () => trackUmami('Nav - The Game'));
+        document.getElementById('btn-google').addEventListener('click', () => trackUmami('Auth - Login Google'));
+        document.getElementById('btn-login').addEventListener('click', () => trackUmami('Auth - Login Email'));
+        document.getElementById('link-forgot-password').addEventListener('click', () => trackUmami('Auth - Forgot Password Link'));
+        document.getElementById('btn-to-register').addEventListener('click', () => trackUmami('Auth - Go To Register'));
+
         function togglePaidCreditsInput() {
             const selectVal = document.getElementById('reveal-answer-optie').value;
             const creditsGroup = document.getElementById('paid-credits-group');
@@ -410,7 +424,7 @@
             }
         }
 		
-document.getElementById('btn-save-password').addEventListener('click', async () => {
+        document.getElementById('btn-save-password').addEventListener('click', async () => {
             const newPassword = document.getElementById('new-password-input').value.trim();
             const msgBox = document.getElementById('password-update-msg');
 
@@ -435,7 +449,6 @@ document.getElementById('btn-save-password').addEventListener('click', async () 
                 msgBox.textContent = "Password successfully updated!";
                 document.getElementById('new-password-input').value = '';
                 
-                // Sluit het menu na een paar seconden of laat het zien
                 setTimeout(() => {
                     togglePasswordSection();
                     msgBox.textContent = '';
@@ -510,7 +523,7 @@ document.getElementById('btn-save-password').addEventListener('click', async () 
             }
         }
 		
-		async function forgotPassword(event) {
+        async function forgotPassword(event) {
             event.preventDefault();
             const emailInput = document.getElementById('auth-email').value.trim();
             const msgBox = document.getElementById('auth-message-login');
