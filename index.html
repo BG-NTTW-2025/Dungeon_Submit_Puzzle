@@ -209,10 +209,11 @@
                         </div>
 
                         <div id="password-settings" class="password-section">
-                            <h4 style="margin-bottom: 15px;">Change Password</h4>
-                            <div class="form-group"><input type="password" placeholder="New Password"></div>
-                            <button class="btn" style="background-color: var(--warning); width: 100%;">Save</button>
-                        </div>
+    <h4 style="margin-bottom: 15px;">Change Password</h4>
+    <div class="form-group"><input type="password" id="new-password-input" placeholder="New Password (min. 6 characters)"></div>
+    <p id="password-update-msg" style="font-size: 0.85rem; margin-bottom: 10px;"></p>
+    <button class="btn" id="btn-save-password" style="background-color: var(--warning); width: 100%;">Save New Password</button>
+</div>
                         
                         <br>
                         <button class="btn" id="btn-logout" style="background-color: #ff3333; width: 100%;">Log out</button>
@@ -497,7 +498,7 @@
                 msgBox.textContent = "Fout: " + error.message;
             } else {
                 msgBox.style.color = "var(--success)";
-                msgBox.textContent = "Check your email! We have sent a recovery link.";
+                msgBox.textContent = "Check your email!!! (inbox, Junk and Spam folder) We have sent you a recovery link. Sender is Supabase Auth.";
             }
         }
 
