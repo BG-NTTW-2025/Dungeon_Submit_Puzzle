@@ -189,7 +189,7 @@
                         
                         <div class="form-group">
                             <label>Designer's name (Username)*</label>
-                            <input type="text" id="google-reg-username" placeholder="e.g. GoogleMaster99">
+                            <input type="text" id="google-reg-username" autocomplete="off" placeholder="e.g. GoogleMaster99">
                         </div>
                         <p id="auth-message-google" style="color: var(--warning); font-size: 0.9rem; margin-bottom: 10px;"></p>
                         
@@ -208,7 +208,7 @@
                         <div class="form-group" style="margin-top: 15px;">
                             <label style="font-size: 0.9rem;">Avatar Image-URL</label>
                             <div style="display: flex; gap: 10px;">
-                                <input type="text" id="profile-avatar-url" placeholder="https://sample.com/my-avatar.png">
+                                <input type="text" id="profile-avatar-url" autocomplete="off" placeholder="https://sample.com/my-avatar.png">
                                 <button class="btn" id="btn-save-avatar" style="margin: 0; padding: 10px 15px;">Save</button>
                             </div>
                             <p id="avatar-save-msg" style="font-size: 0.8rem; margin-top: 5px;"></p>
@@ -252,7 +252,7 @@
                 
                 <div class="form-group">
                     <label>Puzzle Name (unique identifier)</label>
-                    <input type="text" id="puzzle-name" placeholder="e.g. 'Logica Puzzle 1'">
+                    <input type="text" id="puzzle-name" autocomplete="off" placeholder="e.g. 'Logica Puzzle 1'">
                 </div>
 
                 <hr style="border-color: var(--primary); margin: 20px 0;">
@@ -265,7 +265,7 @@
 
                 <div class="form-group">
                     <label>Correct Answer</label>
-                    <input type="text" id="draft-answer" maxlength="100" placeholder="Enter the correct answer here.">
+                    <input type="text" id="draft-answer" maxlength="100" autocomplete="off" placeholder="Enter the correct answer here.">
                     <div id="sCount" class="char-count">0 / 100</div>
                 </div>
 
@@ -297,11 +297,11 @@
                     <h5 style="margin-bottom: 10px; font-size: 1rem; color: #4285F4; display: flex; align-items: center; gap: 6px;"><img src="hint_symb.png" class="tab-icon" alt=""> Hints for the Player (Optional)</h5>
                     <div class="form-group">
                         <label>Hint 1 (Shown upon the first incorrect guess)</label>
-                        <input type="text" id="hint-1" placeholder="Small Hint...">
+                        <input type="text" id="hint-1" autocomplete="off" placeholder="Small Hint...">
                     </div>
                     <div class="form-group" style="margin-top: 15px;">
                         <label>Hint 2 (Shown upon the second incorrect guess)</label>
-                        <input type="text" id="hint-2" placeholder="Big Hint...">
+                        <input type="text" id="hint-2" autocomplete="off" placeholder="Big Hint...">
                     </div>
                 </div>
 
