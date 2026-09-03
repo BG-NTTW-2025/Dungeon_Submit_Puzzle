@@ -253,11 +253,11 @@
                 <div id="qCount" class="char-count">0 / 300</div>
             </div>
 
-            <!-- AI-Categorization Section Added Between Question and Answer[cite: 1, 3] -->
+            <!-- Category Section with Placeholder -->
             <div class="form-group">
                 <label>Category:</label>
                 <select id="category-select">
-				    <option value="AI suggests" selected><img src="ai_symb.png" class="tab-icon" alt=""> AI-suggestie (Standard)</option>
+                    <option value="" disabled selected>Select a category (or AI will choose automatically)</option>
                     <option value="Logic">Logic (For logic puzzles, riddles, and patterns)</option>
                     <option value="General">General (For general questions that don't fit anywhere else)</option>
                     <option value="Geography">Geography (Countries, cities, geography, and the world)</option>
@@ -412,7 +412,7 @@
     document.getElementById('link-forgot-password').addEventListener('click', () => trackUmami('Auth - Forgot Password Link'));
     document.getElementById('btn-to-register').addEventListener('click', () => trackUmami('Auth - Go To Register'));
 
-    // AI Categorization function[cite: 1]
+    // AI Categorization function
     async function triggerCategorize() {
         const questionText = document.getElementById('draft-question').value.trim();
         const selectElem = document.getElementById('category-select');
@@ -432,10 +432,6 @@
             if (error) throw error;
 
             if (data && data.category) {
-                let aiOpt = selectElem.querySelector('option[value="ai-suggestie"]') || selectElem.options[0];
-				// Vaste vervanging van het kapotte teken door een nette robot-emoji die wel werkt in select-options
-                aiOpt.text = `🤖 AI-suggestie: ${data.category}`;
-                aiOpt.value = data.category;
                 selectElem.value = data.category;
             }
         } catch (err) {
@@ -819,7 +815,7 @@
         const puzzleName = document.getElementById('puzzle-name').value.trim() || 'New Puzzle';
         const question = document.getElementById('draft-question').value.trim();
         const answer = document.getElementById('draft-answer').value.trim();
-        const category = document.getElementById('category-select').value;
+        let category = document.getElementById('category-select').value;
         
         let timer = parseInt(document.getElementById('puzzle-timer').value) || 0;
         timer = Math.max(0, Math.min(99, timer));
@@ -852,12 +848,35 @@
             return;
         }
 
-        if (editId) {
+        // Option 1: Automatic AI fallback if no category is selected
+        if (!category || category === "") {
+            msgBox.textContent = "Geen categorie geselecteerd. AI bepaalt automatisch de categorie...";
+            msgBox.style.color = "var(--warning)";
+            try {
+                const { data: aiData, error: aiError } = await supabaseClient.functions.invoke('categorize-puzzle', {
+                    body: { question: question }
+                });
+                if (aiError) throw aiError;
+                if (aiData && aiData.category) {
+                    category = aiData.category;
+                    document.getElementById('category-select').value = category;
+                } else {
+                    category = 'General';
+                }
+            } catch (err) {
+                console.error("AI categorization failed, defaulting to General:", err);
+                category = 'General';
+            }
+        }
+
+        const oldPuzzle = editId ? uniqueDesignerPuzzles.find(p => p.id == editId) : null;
+        const oldName = oldPuzzle ? oldPuzzle.puzzle_name : puzzleName;
+        const oldCategory = oldPuzzle ? oldPuzzle.category : null;
+        const categoryChanged = editId && oldCategory && oldCategory !== category;
+
+        if (editId && !categoryChanged) {
             msgBox.textContent = "Save Changes...";
             msgBox.style.color = "var(--warning)";
-
-            const oldPuzzle = uniqueDesignerPuzzles.find(p => p.id == editId);
-            const oldName = oldPuzzle ? oldPuzzle.puzzle_name : puzzleName;
 
             const { error: updateError } = await supabaseClient
                 .from('puzzle_labyrinth')
@@ -909,14 +928,53 @@
             return;
         }
 
+        // Optie A: If category changed during edit, release old spot first
+        if (categoryChanged) {
+            msgBox.textContent = "Categorie gewijzigd: oud plekje in labyrint vrijgeven...";
+            msgBox.style.color = "var(--warning)";
+            const { data: oldTargets } = await supabaseClient
+                .from('puzzle_labyrinth')
+                .select('id')
+                .eq('designer_id', currentUserId)
+                .in('puzzle_name', [oldName, oldName + ' (Target)']);
+            
+            if (oldTargets) {
+                for (let ot of oldTargets) {
+                    await supabaseClient
+                        .from('puzzle_labyrinth')
+                        .update({
+                            puzzle_name: null,
+                            created_at: null,
+                            designer_name: 'Labyrinth System',
+                            question: null,
+                            answer: null,
+                            google_timer: 0,
+                            max_reward: 0,
+                            chicken_penalty: 0,
+                            wrong_penalty: 0,
+                            hint_1: null,
+                            hint_2: null,
+                            reveal_answer: 'free_answer',
+                            credits_cost: 0,
+                            likes: 0,
+                            dislikes: 0,
+                            is_open: true
+                        })
+                        .eq('id', ot.id);
+                }
+            }
+        }
+
         msgBox.textContent = "Labyrint analyseren en puzzel publiceren...";
         msgBox.style.color = "var(--warning)";
 
         const directions = ['north', 'south', 'east', 'west'];
 
+        // Fetch existing puzzles filtered specifically by the target category's labyrinth!
         let { data: existingPuzzles, error: fetchError } = await supabaseClient
             .from('puzzle_labyrinth')
-            .select('room_id, wall_side, pos_x, pos_y');
+            .select('room_id, wall_side, pos_x, pos_y, category')
+            .eq('category', category);
 
         if (fetchError) {
             msgBox.style.color = "var(--accent)";
@@ -937,10 +995,9 @@
             targetRoomId = 2;
 		} else {
             let roomIds = [...new Set(existingPuzzles.map(p => p.room_id))].sort((a, b) => b - a);
-            let topRoomIds = roomIds.slice(0, 30); // De 30 nieuwste kamers aan de rand
+            let topRoomIds = roomIds.slice(0, 30);
             let foundSpot = false;
 
-            // Pogingen verhoogd naar 400 en gefocust op de nieuwste rand-kamers
             for (let attempt = 0; attempt < 400; attempt++) {
                 let pool = (attempt < 300 && topRoomIds.length > 0) ? topRoomIds : roomIds;
                 let candidateRoomId = pool[Math.floor(Math.random() * pool.length)];
@@ -980,7 +1037,6 @@
                 }
             }
 
-            // Fallback als het onverhoopt toch niet lukt
             if (!foundSpot) {
                 selectedRoomId = Math.max(...roomIds) + 1;
                 selectedWall = 'north';
@@ -1054,8 +1110,13 @@
             msgBox.textContent = "Error during publishing: " + insertError.message;
         } else {
             msgBox.style.color = "var(--success)";
-            msgBox.innerHTML = '<img src="succ_publ_symb.png" style="width:16px; vertical-align:middle; margin-right:4px;" alt=""> Puzzle successfully placed between the Chambers ' + selectedRoomId + ' and ' + targetRoomId + '!';
-            document.getElementById('puzzle-form').reset();
+            msgBox.innerHTML = '<img src="succ_publ_symb.png" style="width:16px; vertical-align:middle; margin-right:4px;" alt=""> Puzzle successfully placed between the Chambers ' + selectedRoomId + ' and ' + targetRoomId + ' in category ' + category + '!';
+            if (editId) {
+                cancelEditMode();
+            } else {
+                document.getElementById('puzzle-form').reset();
+                document.getElementById('category-select').value = "";
+            }
             togglePaidCreditsInput();
             qCount.textContent = "0 / 300";
             sCount.textContent = "0 / 100";
