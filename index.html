@@ -610,7 +610,7 @@
         if (puzzles && puzzles.length > 0) {
             const uniqueMap = new Map();
             puzzles.forEach(p => {
-                let cleanName = (p.puzzle_name || 'New Puzzle').replace(' (Target)', '');
+                let cleanName = (p.puzzle_name || 'New Puzzle').replace(' (Child)', '');
                 if (!uniqueMap.has(cleanName)) {
                     uniqueMap.set(cleanName, { 
                         ...p, 
@@ -747,7 +747,7 @@
             .from('puzzle_labyrinth')
             .select('id')
             .eq('designer_id', currentUserId)
-            .in('puzzle_name', [puzzleName, puzzleName + ' (Target)']);
+            .in('puzzle_name', [puzzleName, puzzleName + ' (Child)']);
 
         if (fetchError) {
             alert("Error retrieving puzzle data: " + fetchError.message);
@@ -881,7 +881,7 @@
             const { error: updateError } = await supabaseClient
                 .from('puzzle_labyrinth')
                 .update({
-                    puzzle_name: puzzleName,
+                    puzzle_name: puzzleName + ' (Parent)',
                     question: question,
                     answer: answer,
                     category: category,
@@ -895,12 +895,12 @@
                     credits_cost: creditsCost
                 })
                 .eq('designer_id', currentUserId)
-                .eq('puzzle_name', oldName);
+                .eq('puzzle_name', oldName + ' (Parent)');
 
             await supabaseClient
                 .from('puzzle_labyrinth')
                 .update({
-                    puzzle_name: puzzleName + ' (Target)',
+                    puzzle_name: puzzleName + ' (Child)',
                     question: question,
                     answer: answer,
                     category: category,
@@ -914,7 +914,7 @@
                     credits_cost: creditsCost
                 })
                 .eq('designer_id', currentUserId)
-                .eq('puzzle_name', oldName + ' (Target)');
+                .eq('puzzle_name', oldName + ' (Child)');
 
             if (updateError) {
                 msgBox.style.color = "var(--accent)";
@@ -936,7 +936,7 @@
                 .from('puzzle_labyrinth')
                 .select('id')
                 .eq('designer_id', currentUserId)
-                .in('puzzle_name', [oldName, oldName + ' (Target)']);
+                .in('puzzle_name', [oldName, oldName + ' (Child)']);
             
             if (oldTargets) {
                 for (let ot of oldTargets) {
@@ -1055,13 +1055,23 @@
                 targetRoomId = Math.max(...roomIds, 0) + 1;
             }
         }
+		
+		// Haal eerst de juiste username op uit de designers-tabel
+const { data: designerData } = await supabaseClient
+    .from('designers')
+    .select('username')
+    .eq('id', currentUserId)
+    .single();
+
+const currentUsername = designerData ? designerData.username : 'Unknown';
 
         const { error: insertError } = await supabaseClient
             .from('puzzle_labyrinth')
             .insert([
                 {
                     designer_id: currentUserId,
-                    puzzle_name: puzzleName,
+					designer_name: currentUsername,
+                    puzzle_name: puzzleName + ' (Parent)',
                     question: question,
                     answer: answer,
                     category: category,
@@ -1083,7 +1093,8 @@
                 },
                 {
                     designer_id: currentUserId,
-                    puzzle_name: puzzleName + ' (Target)',
+					designer_name: currentUsername,
+                    puzzle_name: puzzleName + ' (Child)',
                     question: question,
                     answer: answer,
                     category: category,
