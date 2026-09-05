@@ -617,6 +617,14 @@
                         puzzle_name: cleanName, 
                         likes: p.likes || 0,
                         dislikes: p.dislikes || 0 
+						google_timer: timer,
+max_reward: points,
+chicken_penalty: chicken,
+wrong_penalty: penalty,
+hint_1: hint1 || null,
+hint_2: hint2 || null,
+reveal_answer: revealAnswer,
+credits_cost: creditsCost
                     });
                 } else {
                     let existing = uniqueMap.get(cleanName);
