@@ -610,7 +610,7 @@
         if (puzzles && puzzles.length > 0) {
             const uniqueMap = new Map();
             puzzles.forEach(p => {
-                let cleanName = (p.puzzle_name || 'New Puzzle').replace(' (Child)', '');
+                let cleanName = (p.puzzle_name || 'New Puzzle').replace(' (Parent)', '').replace(' (Child)', '');;
                 if (!uniqueMap.has(cleanName)) {
                     uniqueMap.set(cleanName, { 
                         ...p, 
