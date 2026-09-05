@@ -757,26 +757,42 @@
         if (targetPuzzles && targetPuzzles.length > 0) {
             for (let p of targetPuzzles) {
                 const { error: updateError } = await supabaseClient
-                    .from('puzzle_labyrinth')
-                    .update({
-                        puzzle_name: null,
-                        created_at: null,
-                        designer_name: 'Labyrinth System',
-                        question: null,
-                        answer: null,
-                        google_timer: 0,
-                        max_reward: 0,
-                        chicken_penalty: 0,
-                        wrong_penalty: 0,
-                        hint_1: null,
-                        hint_2: null,
-                        reveal_answer: 'free_answer',
-                        credits_cost: 0,
-                        likes: 0,
-                        dislikes: 0,
-                        is_open: true
-                    })
-                    .eq('id', p.id);
+                .from('puzzle_labyrinth')
+                .update({
+                    puzzle_name: puzzleName + ' (Parent)',
+                    question: question,
+                    answer: answer,
+                    category: category,
+                    google_timer: timer,
+                    max_reward: points,
+                    chicken_penalty: chicken,
+                    wrong_penalty: penalty,
+                    hint_1: hint1 || null,
+                    hint_2: hint2 || null,
+                    reveal_answer: revealAnswer,
+                    credits_cost: creditsCost
+                })
+                .eq('designer_id', currentUserId)
+                .eq('puzzle_name', oldName + ' (Parent)');
+
+            await supabaseClient
+                .from('puzzle_labyrinth')
+                .update({
+                    puzzle_name: puzzleName + ' (Child)',
+                    question: question,
+                    answer: answer,
+                    category: category,
+                    google_timer: timer,
+                    max_reward: points,
+                    chicken_penalty: chicken,
+                    wrong_penalty: penalty,
+                    hint_1: hint1 || null,
+                    hint_2: hint2 || null,
+                    reveal_answer: revealAnswer,
+                    credits_cost: creditsCost
+                })
+                .eq('designer_id', currentUserId)
+                .eq('puzzle_name', oldName + ' (Child)');
 
                 if (updateError) {
                     console.error("Error opening passage ID " + p.id, updateError.message);
