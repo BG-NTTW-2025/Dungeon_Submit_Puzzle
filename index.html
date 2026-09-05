@@ -744,10 +744,10 @@
         if (!confirm('Are you sure you want to remove the puzzle "' + puzzleName + '"? The puzzle will disappear, and the passage will be permanently opened for players.')) return;
 
         const { data: targetPuzzles, error: fetchError } = await supabaseClient
-            .from('puzzle_labyrinth')
-            .select('id')
-            .eq('designer_id', currentUserId)
-            .in('puzzle_name', [puzzleName, puzzleName + ' (Child)']);
+    .from('puzzle_labyrinth')
+    .select('id')
+    .eq('designer_id', currentUserId)
+    .in('puzzle_name', [puzzleName, puzzleName + ' (Parent)', puzzleName + ' (Child)']);
 
         if (fetchError) {
             alert("Error retrieving puzzle data: " + fetchError.message);
@@ -936,7 +936,7 @@
                 .from('puzzle_labyrinth')
                 .select('id')
                 .eq('designer_id', currentUserId)
-                .in('puzzle_name', [oldName, oldName + ' (Child)']);
+                .in('puzzle_name', [puzzleName + ' (Parent)', puzzleName + ' (Child)'])
             
             if (oldTargets) {
                 for (let ot of oldTargets) {
