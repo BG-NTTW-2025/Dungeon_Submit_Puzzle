@@ -740,69 +740,52 @@
         openTab('tab-stats');
     }
 
-    async function deletePuzzleByName(puzzleName) {
-        if (!confirm('Are you sure you want to remove the puzzle "' + puzzleName + '"? The puzzle will disappear, and the passage will be permanently opened for players.')) return;
+async function deletePuzzleByName(puzzleName) {
+    if (!confirm('Are you sure you want to remove the puzzle "' + puzzleName + '"? The puzzle will disappear, and the passage will be permanently opened for players.')) return;
 
-        const { data: targetPuzzles, error: fetchError } = await supabaseClient
-    .from('puzzle_labyrinth')
-    .select('id')
-    .eq('designer_id', currentUserId)
-    .in('puzzle_name', [puzzleName, puzzleName + ' (Parent)', puzzleName + ' (Child)']);
+    const { data: targetPuzzles, error: fetchError } = await supabaseClient
+        .from('puzzle_labyrinth')
+        .select('id')
+        .eq('designer_id', currentUserId)
+        .in('puzzle_name', [puzzleName, puzzleName + ' (Parent)', puzzleName + ' (Child)']);
 
-        if (fetchError) {
-            alert("Error retrieving puzzle data: " + fetchError.message);
-            return;
-        }
+    if (fetchError) {
+        alert("Error retrieving puzzle data: " + fetchError.message);
+        return;
+    }
 
-        if (targetPuzzles && targetPuzzles.length > 0) {
-            for (let p of targetPuzzles) {
-                const { error: updateError } = await supabaseClient
+    if (targetPuzzles && targetPuzzles.length > 0) {
+        for (let p of targetPuzzles) {
+            // Zet de passage weer open en wis de puzzeldata zodat deze verdwijnt
+            const { error: updateError } = await supabaseClient
                 .from('puzzle_labyrinth')
                 .update({
-                    puzzle_name: puzzleName + ' (Parent)',
-                    question: question,
-                    answer: answer,
-                    category: category,
-                    google_timer: timer,
-                    max_reward: points,
-                    chicken_penalty: chicken,
-                    wrong_penalty: penalty,
-                    hint_1: hint1 || null,
-                    hint_2: hint2 || null,
-                    reveal_answer: revealAnswer,
-                    credits_cost: creditsCost
+                    puzzle_name: null,
+                    question: null,
+                    answer: null,
+                    google_timer: 0,
+                    max_reward: 30,
+                    chicken_penalty: 0,
+                    wrong_penalty: 10,
+                    hint_1: null,
+                    hint_2: null,
+                    reveal_answer: 'free_answer',
+                    credits_cost: 5,
+                    likes: 0,
+                    dislikes: 0,
+                    is_open: true
                 })
-                .eq('designer_id', currentUserId)
-                .eq('puzzle_name', oldName + ' (Parent)');
+                .eq('id', p.id);
 
-            await supabaseClient
-                .from('puzzle_labyrinth')
-                .update({
-                    puzzle_name: puzzleName + ' (Child)',
-                    question: question,
-                    answer: answer,
-                    category: category,
-                    google_timer: timer,
-                    max_reward: points,
-                    chicken_penalty: chicken,
-                    wrong_penalty: penalty,
-                    hint_1: hint1 || null,
-                    hint_2: hint2 || null,
-                    reveal_answer: revealAnswer,
-                    credits_cost: creditsCost
-                })
-                .eq('designer_id', currentUserId)
-                .eq('puzzle_name', oldName + ' (Child)');
-
-                if (updateError) {
-                    console.error("Error opening passage ID " + p.id, updateError.message);
-                }
+            if (updateError) {
+                console.error("Error opening passage ID " + p.id, updateError.message);
             }
         }
-
-        alert("The puzzle has been removed and the passageway in the labyrinth has been opened!");
-        loadDesignerPuzzles(currentUserId);
     }
+
+    alert("The puzzle has been removed and the passageway in the labyrinth has been opened!");
+    loadDesignerPuzzles(currentUserId);
+}
 
     function getOppositeWall(wall) {
         switch (wall) {
